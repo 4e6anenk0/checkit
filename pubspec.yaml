@@ -1,0 +1,19 @@
+name: checkit
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.7.2
+
+# Add regular dependencies here.
+dependencies:
+  intl: ^0.20.2
+  # path: ^1.8.0
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.24.0
+  validart: ^0.1.2
+  formz: ^0.8.0
+  benchmark_harness: ^2.3.1
