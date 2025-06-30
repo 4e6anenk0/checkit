@@ -89,10 +89,6 @@ Checkit.string.ip().v4().validateOnce("192.168.0.1");
 Checkit.string.subnet("192.168.0.0/24").contains("192.168.0.42");
 ```
 
-Вот пример раздела для `README.md`, который красиво раскрывает идею **инверсии валидаторов**:
-
----
-
 ## 🔁 Inverting Validators with `.not()`
 
 Checkit supports expressive validation chains — including the ability to **invert any validator** using the `.not(...)` method. This allows you to declare what a value **must not** contain in a readable, declarative way.
