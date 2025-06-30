@@ -1,6 +1,5 @@
-import 'package:checkit/src/resources/date_resources.dart';
-import 'package:checkit/src/resources/string_date_parser.dart';
-
+import '../resources/date_resources.dart';
+import '../resources/string_date_parser.dart';
 import 'validator.dart';
 
 abstract class StringDateValidator {

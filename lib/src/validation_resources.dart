@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-/// Базовый абстрактный класс ресурсов
 abstract class ValidationResourcesBase {
   RegExp get emailPattern;
   RegExp get alphaPattern;
@@ -14,8 +13,6 @@ abstract class ValidationResourcesBase {
   RegExp get jwtPattern;
   final HashMap<String, dynamic> _permanent = HashMap();
   final HashMap<String, dynamic> _temporary = HashMap();
-
-  //ValidationPatterns get patterns;
 
   T getOrCreate<T>(String key, T Function() factory, {bool temp = true}) {
     final target = temp ? _temporary : _permanent;
@@ -60,11 +57,7 @@ abstract class ValidationResourcesBase {
   Iterable<String> get keys => {..._permanent.keys, ..._temporary.keys};
 }
 
-/// Реализация по умолчанию с ленивым кешем
 class ValidationResources extends ValidationResourcesBase {
-  /*  @override
-  ValidationPatterns get patterns => ValidationPatterns(); */
-
   RegExp? _emailPattern;
   RegExp? _alphaPattern;
   RegExp? _alphanumericPattern;

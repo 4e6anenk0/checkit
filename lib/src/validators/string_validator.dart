@@ -1,5 +1,4 @@
-import 'package:checkit/src/validation_context.dart';
-
+import '../validation_context.dart';
 import 'validator.dart';
 
 abstract class StringValidator {

@@ -1,6 +1,4 @@
-import 'package:checkit/src/resources/ip_parser.dart';
-import 'package:checkit/src/resources/ip_resource.dart';
-
+import '../resources/ip_resource.dart';
 import 'validator.dart';
 
 abstract class SubnetValidator {

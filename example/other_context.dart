@@ -1,5 +1,5 @@
 import 'package:checkit/checkit.dart';
-import 'package:checkit/src/errors/warnings.dart';
+import 'package:checkit/checkit_core.dart';
 
 class UkNumErrors implements NumCheckitErrorsBase {
   @override

@@ -1,4 +1,5 @@
 import 'package:checkit/checkit.dart';
+import 'package:checkit/checkit_core.dart';
 
 void main() {
   final validator = AndValidator([

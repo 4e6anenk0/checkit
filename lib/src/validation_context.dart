@@ -1,6 +1,5 @@
-import 'package:checkit/src/errors/warnings.dart';
-
 import 'errors/errors.dart';
+import 'errors/warnings.dart';
 import 'validation_resources.dart';
 
 /// Specifies how case is handled during string validation.
