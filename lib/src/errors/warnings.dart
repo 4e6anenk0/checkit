@@ -1,4 +1,5 @@
 class Warnings {
+  const Warnings();
   String dateTimeResourceNotFound() =>
       '''Warning! DateTimeResource not found.''';
 

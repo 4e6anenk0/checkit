@@ -35,12 +35,9 @@ class EsNumErrors implements NumCheckitErrorsBase {
   range(int min, int max) => "El valor debe estar entre $min y $max";
 }
 
-class UkErrors implements CheckitErrorsBase {
+class UkErrors implements ICheckitErrors {
   @override
   GeneralCheckitErrors get generalErrors => GeneralCheckitErrors();
-
-  @override
-  String get locale => 'uk';
 
   @override
   NumCheckitErrorsBase get numErrors => UkNumErrors();
@@ -58,12 +55,9 @@ class UkErrors implements CheckitErrorsBase {
   IpCheckitErrorsBase get ipErrors => IpCheckitErrors();
 }
 
-class EsErrors implements CheckitErrorsBase {
+class EsErrors implements ICheckitErrors {
   @override
   GeneralCheckitErrors get generalErrors => GeneralCheckitErrors();
-
-  @override
-  String get locale => 'es';
 
   @override
   NumCheckitErrorsBase get numErrors => EsNumErrors();
@@ -82,12 +76,10 @@ class EsErrors implements CheckitErrorsBase {
 }
 
 void main() {
+  Checkit.config = ValidatorConfig().copyWith(
+    errors: UkErrors(),
+  ); // top level configuration
   final validatorBuilder = Checkit.num.min(10).max(20);
-
-  validatorBuilder.addLocale(UkErrors());
-  validatorBuilder.addLocale(EsErrors());
-
-  validatorBuilder.setLocale('uk');
 
   final ukValidator = validatorBuilder.build();
 
@@ -102,9 +94,11 @@ void main() {
     print('Validation Failed: ${result.toMessageString()}');
   }
 
-  validatorBuilder.setLocale('es');
-
-  final esValidator = validatorBuilder.build();
+  final esValidator = validatorBuilder.build(
+    context: ValidationContext.defaultContext().copyWith(
+      errors: EsErrors(),
+    ), // override context
+  );
 
   final result2 = esValidator.validate(value);
 

@@ -4,7 +4,7 @@ import 'validator.dart';
 
 abstract class StringValidator {
   static Validator<String> email({String? error}) => (value, context) {
-    if (context.resources.patterns.emailPattern.hasMatch(value)) {
+    if (context.resources.emailPattern.hasMatch(value)) {
       return (true, null);
     }
     return (false, error ?? context.errors.stringErrors.email());
@@ -43,13 +43,12 @@ abstract class StringValidator {
   };
 
   static Validator<String> alpha({String? error}) => (value, context) {
-    if (context.resources.patterns.alphaPattern.hasMatch(value))
-      return (true, null);
+    if (context.resources.alphaPattern.hasMatch(value)) return (true, null);
     return (false, error ?? context.errors.stringErrors.alpha());
   };
 
   static Validator<String> alphanumeric({String? error}) => (value, context) {
-    if (context.resources.patterns.alphanumericPattern.hasMatch(value)) {
+    if (context.resources.alphanumericPattern.hasMatch(value)) {
       return (true, null);
     }
     return (false, error ?? context.errors.stringErrors.alphanumeric());
@@ -82,7 +81,7 @@ abstract class StringValidator {
   };
 
   static Validator<String> jwt({String? error}) => (value, context) {
-    if (context.resources.patterns.jwtPattern.hasMatch(value)) {
+    if (context.resources.jwtPattern.hasMatch(value)) {
       return (true, null);
     }
     return (false, error ?? context.errors.stringErrors.jwt());

@@ -5,74 +5,62 @@ import 'password_errors.dart';
 import 'string_date_errors.dart';
 import 'string_errors.dart';
 
-class CheckitErrorsBase {
-  const CheckitErrorsBase({
-    required this.stringErrors,
-    required this.numErrors,
-    required this.generalErrors,
-    required this.stringDateErrors,
-    required this.passwordErrors,
-    required this.ipErrors,
-    required this.locale,
-  });
-  final String locale;
-  final StringCheckitErrorsBase stringErrors;
-  final NumCheckitErrorsBase numErrors;
-  final GeneralCheckitErrorsBase generalErrors;
-  final StringDateCheckitErrorsBase stringDateErrors;
-  final PasswordCheckitErrorsBase passwordErrors;
-  final IpCheckitErrorsBase ipErrors;
+abstract interface class ICheckitErrors {
+  StringCheckitErrorsBase get stringErrors;
+  NumCheckitErrorsBase get numErrors;
+  IpCheckitErrorsBase get ipErrors;
+  PasswordCheckitErrorsBase get passwordErrors;
+  StringDateCheckitErrorsBase get stringDateErrors;
+  GeneralCheckitErrorsBase get generalErrors;
 }
 
-class LocaleGroup {
-  LocaleGroup();
+class CheckitErrors implements ICheckitErrors {
+  @override
+  final StringCheckitErrorsBase stringErrors;
+  @override
+  final NumCheckitErrorsBase numErrors;
+  @override
+  final IpCheckitErrorsBase ipErrors;
+  @override
+  final PasswordCheckitErrorsBase passwordErrors;
+  @override
+  final StringDateCheckitErrorsBase stringDateErrors;
+  @override
+  final GeneralCheckitErrorsBase generalErrors;
 
-  final Map<String, CheckitErrorsBase> _locales = {};
-  final CheckitErrorsBase _en = const CheckitErrorsBase(
+  const CheckitErrors({
+    required this.stringErrors,
+    required this.numErrors,
+    required this.ipErrors,
+    required this.passwordErrors,
+    required this.stringDateErrors,
+    required this.generalErrors,
+  });
+
+  factory CheckitErrors.defaultErrors() => const CheckitErrors(
     stringErrors: StringCheckitErrors(),
     numErrors: NumCheckitErrors(),
-    generalErrors: GeneralCheckitErrors(),
-    stringDateErrors: StringDateCheckitErrors(),
-    passwordErrors: PasswordCheckitErrors(),
     ipErrors: IpCheckitErrors(),
-    locale: 'en',
+    passwordErrors: PasswordCheckitErrors(),
+    stringDateErrors: StringDateCheckitErrors(),
+    generalErrors: GeneralCheckitErrors(),
   );
-  String _defaultLocale = 'en';
 
-  String get defaultLocaleKey => _defaultLocale;
-
-  bool changeLocale(String locale) {
-    if (_locales.containsKey(locale)) {
-      _defaultLocale = locale;
-      return true;
-    }
-    return false;
-  }
-
-  void addLocale(CheckitErrorsBase locale) {
-    _locales[locale.locale] = locale;
-  }
-
-  CheckitErrorsBase getLocale(String locale) {
-    final errorsLocale = _locales[locale];
-    if (errorsLocale != null) {
-      return errorsLocale;
-    } else {
-      return _en;
-    }
-  }
-
-  CheckitErrorsBase getDefault() {
-    if (_defaultLocale == 'en') return _en;
-    final errorsLocale = _locales[_defaultLocale];
-    if (errorsLocale != null) {
-      return errorsLocale;
-    } else {
-      return _en;
-    }
-  }
-
-  CheckitErrorsBase getEnglish() {
-    return _en;
+  CheckitErrors copyWith({
+    StringCheckitErrorsBase? stringErrors,
+    NumCheckitErrorsBase? numErrors,
+    IpCheckitErrorsBase? ipErrors,
+    PasswordCheckitErrorsBase? passwordErrors,
+    StringDateCheckitErrorsBase? stringDateErrors,
+    GeneralCheckitErrorsBase? generalErrors,
+  }) {
+    return CheckitErrors(
+      stringErrors: stringErrors ?? this.stringErrors,
+      numErrors: numErrors ?? this.numErrors,
+      ipErrors: ipErrors ?? this.ipErrors,
+      passwordErrors: passwordErrors ?? this.passwordErrors,
+      stringDateErrors: stringDateErrors ?? this.stringDateErrors,
+      generalErrors: generalErrors ?? this.generalErrors,
+    );
   }
 }

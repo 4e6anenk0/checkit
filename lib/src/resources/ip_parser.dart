@@ -6,6 +6,106 @@ enum IpType {
   String toString() => name.toUpperCase();
 }
 
+extension IpAddressExtensions on IpAddress {
+  bool inSubnet(IpSubnet subnet) {
+    return subnet.contains(this);
+  }
+}
+
+class IpSubnet {
+  final IpAddress network;
+  final int prefixLength;
+
+  IpSubnet._(this.network, this.prefixLength);
+
+  BigInt countOfAddresses() {
+    if (network.type == IpType.ipv4) {
+      return BigInt.two.pow(32 - prefixLength);
+    } else {
+      return BigInt.two.pow(128 - prefixLength);
+    }
+  }
+
+  IpAddress? getBroadcastAddress() {
+    if (network.type != IpType.ipv4) {
+      return null;
+    }
+
+    final totalBits = 32;
+    final hostBits = totalBits - prefixLength;
+    final base = network.toBigInt();
+
+    final broadcastValue = base | ((BigInt.one << hostBits) - BigInt.one);
+    return IpAddress.fromBigInt(network.type, broadcastValue);
+  }
+
+  factory IpSubnet.fromCidr(String cidr) {
+    final parts = cidr.split('/');
+    if (parts.length != 2) {
+      throw Exception();
+    }
+
+    final ip = IpParser.parse(parts[0]);
+    if (ip == null) {
+      throw Exception();
+    }
+
+    final prefixLength = int.tryParse(parts[1]);
+    final maxBits = ip.type == IpType.ipv4 ? 32 : 128;
+    if (prefixLength == null || prefixLength < 0 || prefixLength > maxBits) {
+      throw Exception();
+    }
+
+    final masked = _applyMask(ip, prefixLength);
+
+    return IpSubnet._(masked, prefixLength);
+  }
+
+  /* static IpAddress _applyMask(IpAddress ip, int prefixLength) {
+    final totalBytes = ip.bytes.length;
+    final maskedBytes = List<int>.from(ip.bytes);
+
+    final fullBytes = prefixLength ~/ 8;
+    final remainingBits = prefixLength % 8;
+
+    // Обрезаем байты за пределами префикса
+    for (int i = fullBytes + (remainingBits > 0 ? 1 : 0); i < totalBytes; i++) {
+      maskedBytes[i] = 0;
+    }
+
+    // Маскируем последний байт частично, если нужно
+    if (remainingBits > 0) {
+      final mask = 0xFF << (8 - remainingBits) & 0xFF;
+      maskedBytes[fullBytes] &= mask;
+    }
+
+    return IpAddress.fromBytes(ip.type, maskedBytes);
+  } */
+
+  static IpAddress _applyMask(IpAddress ip, int prefixLength) {
+    final totalBits = ip.bytes.length * 8;
+    final maskedBytes = List<int>.from(ip.bytes);
+    for (int i = 0; i < totalBits; i++) {
+      if (i >= prefixLength) {
+        final byteIndex = i ~/ 8;
+        final bitIndex = 7 - (i % 8);
+        maskedBytes[byteIndex] &= ~(1 << bitIndex);
+        print(maskedBytes.toString());
+      }
+    }
+    return IpAddress.fromBytes(ip.type, maskedBytes);
+  }
+
+  bool contains(IpAddress other) {
+    if (other.type != network.type) return false;
+    final otherMasked = _applyMask(other, prefixLength);
+    return network == otherMasked;
+  }
+
+  @override
+  String toString() => '${network.toReadableString()}/$prefixLength';
+}
+
 class IpAddress {
   final IpType type;
   final List<int> bytes;
@@ -16,11 +116,100 @@ class IpAddress {
   static const int ipv6Length = 16;
 
   factory IpAddress.fromBytes(IpType type, List<int> bytes) {
-    if ((type == IpType.ipv4 && bytes.length != ipv4Length) ||
-        (type == IpType.ipv6 && bytes.length != ipv6Length)) {
-      throw ArgumentError('Invalid byte length for $type: ${bytes.length}');
+    final expectedLength = type == IpType.ipv4 ? ipv4Length : ipv6Length;
+    if (bytes.length != expectedLength) {
+      throw ArgumentError('Invalid IP byte length');
     }
     return IpAddress._(type, List.unmodifiable(bytes));
+  }
+
+  BigInt toBigInt() {
+    BigInt result = BigInt.zero;
+    for (final byte in bytes) {
+      result = (result << 8) | BigInt.from(byte);
+    }
+    return result;
+  }
+
+  factory IpAddress.fromBigInt(IpType type, BigInt value) {
+    final length = type == IpType.ipv4 ? 4 : 16;
+    final bytes = List<int>.filled(length, 0);
+    var temp = value;
+    for (int i = length - 1; i >= 0; i--) {
+      bytes[i] = (temp & BigInt.from(0xFF)).toInt();
+      temp = temp >> 8;
+    }
+    return IpAddress.fromBytes(type, bytes);
+  }
+
+  IpAddress operator +(int offset) =>
+      IpAddress.fromBigInt(type, toBigInt() + BigInt.from(offset));
+  IpAddress operator -(int offset) =>
+      IpAddress.fromBigInt(type, toBigInt() - BigInt.from(offset));
+
+  int compareTo(IpAddress other) {
+    if (type != other.type) {
+      throw ArgumentError('Cannot compare IPs of different types');
+    }
+    return toBigInt().compareTo(other.toBigInt());
+  }
+
+  bool operator <(IpAddress other) => compareTo(other) < 0;
+  bool operator >(IpAddress other) => compareTo(other) > 0;
+  bool operator <=(IpAddress other) => compareTo(other) <= 0;
+  bool operator >=(IpAddress other) => compareTo(other) >= 0;
+
+  @override
+  bool operator ==(Object other) =>
+      other is IpAddress &&
+      type == other.type &&
+      bytes.length == other.bytes.length &&
+      _listEquals(bytes, other.bytes);
+
+  @override
+  int get hashCode => Object.hashAll([type, ...bytes]);
+
+  static bool _listEquals(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  bool isLoopback() {
+    if (type == IpType.ipv4) {
+      return bytes.length == 4 && bytes[0] == 127;
+    }
+    if (type == IpType.ipv6) {
+      return bytes.length == 16 &&
+          bytes.sublist(0, 15).every((b) => b == 0) &&
+          bytes[15] == 1;
+    }
+    return false;
+  }
+
+  bool isLinkLocal() {
+    if (type == IpType.ipv4 && bytes.length == 4) {
+      // 169.254.0.0/16
+      return bytes[0] == 169 && bytes[1] == 254;
+    } else if (type == IpType.ipv6 && bytes.length == 16) {
+      // fe80::/10
+      return bytes[0] == 0xfe && (bytes[1] & 0xc0) == 0x80;
+    }
+    return false;
+  }
+
+  bool isLocalhost() {
+    if (type == IpType.ipv4) {
+      return bytes[0] == 127 && bytes[1] == 0 && bytes[2] == 0 && bytes[3] == 1;
+    }
+    if (type == IpType.ipv6) {
+      return bytes.length == 16 &&
+          bytes.sublist(0, 15).every((b) => b == 0) &&
+          bytes[15] == 1;
+    }
+    return false;
   }
 
   String toReadableString() {
@@ -39,23 +228,6 @@ class IpAddress {
 
   @override
   String toString() => toReadableString();
-
-  @override
-  bool operator ==(Object other) =>
-      other is IpAddress &&
-      other.type == type &&
-      _listEquals(other.bytes, bytes);
-
-  @override
-  int get hashCode => Object.hashAll([type, ...bytes]);
-
-  static bool _listEquals(List<int> a, List<int> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
 }
 
 class IpParser {
@@ -118,25 +290,5 @@ class IpParser {
     }
 
     return IpAddress.fromBytes(IpType.ipv6, bytes);
-  }
-}
-
-void main() {
-  final inputs = [
-    '192.168.0.1',
-    '2001:db8::1',
-    '::1',
-    '::ffff:192.168.1.1',
-    'invalid::ip',
-    '::',
-    '',
-  ];
-
-  for (final ip in inputs) {
-    final parsed = IpParser.parse(ip);
-    print('$ip => ${parsed?.toReadableString() ?? 'Invalid'}');
-    print('$ip => ${parsed?.type ?? 'Invalid'}');
-
-    print(parsed != null ? parsed.bytes[0].toRadixString(2) : 'Invalid');
   }
 }

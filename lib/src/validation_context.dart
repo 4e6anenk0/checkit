@@ -13,67 +13,51 @@ enum CaseHandling {
 }
 
 class ValidationContext {
-  final String locale;
-  final CheckitErrorsBase errors;
+  final ICheckitErrors errors;
   final Warnings warnings;
   final ValidationResourcesBase resources;
   final CaseHandling caseHandling;
+  final bool usePermanentCache;
+  final bool stopOnFirstError;
 
   const ValidationContext({
-    required this.locale,
     required this.errors,
     required this.warnings,
     required this.resources,
     required this.caseHandling,
+    required this.usePermanentCache,
+    required this.stopOnFirstError,
   });
 
   factory ValidationContext.defaultContext() => ValidationContext(
-    locale: 'en',
-    errors: const CheckitErrorsBase(
+    errors: const CheckitErrors(
       stringErrors: StringCheckitErrors(),
       generalErrors: GeneralCheckitErrors(),
       numErrors: NumCheckitErrors(),
       stringDateErrors: StringDateCheckitErrors(),
       passwordErrors: PasswordCheckitErrors(),
       ipErrors: IpCheckitErrors(),
-      locale: 'en',
     ),
     warnings: Warnings(),
     resources: ValidationResources(),
     caseHandling: CaseHandling.exact,
-  );
-
-  factory ValidationContext.withLocale(LocaleGroup locale) => ValidationContext(
-    locale: locale.defaultLocaleKey,
-    errors: locale.getDefault(),
-    warnings: Warnings(),
-    resources: ValidationResources(),
-    caseHandling: CaseHandling.exact,
-  );
-
-  static get defaultErrors => const CheckitErrorsBase(
-    stringErrors: StringCheckitErrors(),
-    generalErrors: GeneralCheckitErrors(),
-    numErrors: NumCheckitErrors(),
-    stringDateErrors: StringDateCheckitErrors(),
-    passwordErrors: PasswordCheckitErrors(),
-    ipErrors: IpCheckitErrors(),
-    locale: 'en',
+    usePermanentCache: false,
+    stopOnFirstError: false,
   );
 
   ValidationContext copyWith({
-    String? locale,
-    CheckitErrorsBase? errors,
+    ICheckitErrors? errors,
     Warnings? warnings,
     ValidationResourcesBase? resources,
     CaseHandling? caseHandling,
   }) {
     return ValidationContext(
-      locale: locale ?? this.locale,
       errors: errors ?? this.errors,
       warnings: warnings ?? this.warnings,
       resources: resources ?? this.resources,
       caseHandling: caseHandling ?? this.caseHandling,
+      usePermanentCache: false,
+      stopOnFirstError: false,
     );
   }
 }

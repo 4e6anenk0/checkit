@@ -1,5 +1,7 @@
+import 'package:checkit/src/errors/warnings.dart';
 import 'package:checkit/src/validators/ip_validator.dart';
 import 'package:checkit/src/validators/password_validator.dart';
+import 'package:checkit/src/validators/subnet_validator.dart';
 
 import 'advanced_validators/group_validators.dart';
 import 'errors/errors.dart';
@@ -9,9 +11,59 @@ import 'validation_resources.dart';
 import 'validation_result.dart';
 
 abstract class Checkit {
-  static LocaleGroup locale = LocaleGroup();
-  static StringNode get string => StringNode(locale);
-  static NumNode get num => NumNode(locale);
+  static ValidatorConfig config = ValidatorConfig();
+
+  static StringNode get string => StringNode(config.buildContext());
+  static NumNode get num => NumNode(config.buildContext());
+}
+
+class ValidatorConfig {
+  ValidatorConfig({
+    this.stopOnFirstError = false,
+    this.errors = const CheckitErrors(
+      stringErrors: StringCheckitErrors(),
+      generalErrors: GeneralCheckitErrors(),
+      numErrors: NumCheckitErrors(),
+      stringDateErrors: StringDateCheckitErrors(),
+      passwordErrors: PasswordCheckitErrors(),
+      ipErrors: IpCheckitErrors(),
+    ),
+    this.warnings = const Warnings(),
+    this.caseHandling = CaseHandling.exact,
+    this.usePermanentCache = false,
+  });
+  final ICheckitErrors errors;
+  final Warnings warnings;
+  final ValidationResourcesBase resources = ValidationResources();
+  final bool stopOnFirstError;
+  final bool usePermanentCache;
+  final CaseHandling caseHandling;
+
+  ValidatorConfig copyWith({
+    ValidationContext? context,
+    bool? stopOnFirstError,
+    bool? usePermanentCache,
+    ICheckitErrors? errors,
+    CaseHandling? caseHandling,
+  }) {
+    return ValidatorConfig(
+      stopOnFirstError: stopOnFirstError ?? this.stopOnFirstError,
+      errors: errors ?? this.errors,
+      usePermanentCache: usePermanentCache ?? this.usePermanentCache,
+      caseHandling: caseHandling ?? this.caseHandling,
+    );
+  }
+
+  ValidationContext buildContext() {
+    return ValidationContext(
+      errors: errors,
+      warnings: warnings,
+      resources: resources,
+      caseHandling: caseHandling,
+      usePermanentCache: usePermanentCache,
+      stopOnFirstError: stopOnFirstError,
+    );
+  }
 }
 
 class ValidatorSet<T> {
@@ -25,7 +77,7 @@ class ValidatorSet<T> {
     required this.stopOnFirstError,
   });
 
-  ValidationResult validate(T value, {bool? stopOnFirstError}) {
+  ValidationResult validate(T? value, {bool? stopOnFirstError}) {
     context.resources.clear();
     final validator = AndValidator(validators, context);
     return validator.validate(
@@ -36,12 +88,11 @@ class ValidatorSet<T> {
 }
 
 abstract class ValidatorNode<T> {
-  ValidatorNode(this._locale);
+  ValidatorNode(this._context);
 
-  final LocaleGroup _locale;
+  final ValidationContext _context;
+
   final List<Validator<T>> _validators = [];
-  ValidationContext _context = ValidationContext.defaultContext();
-  bool stopOnFirstError = false;
 
   ValidatorNode<T> not(Validator<T> validator, {String? error}) {
     _validators.add(GeneralValidator.not(validator, error: error));
@@ -65,93 +116,43 @@ abstract class ValidatorNode<T> {
     return this;
   }
 
-  void setContext(ValidationContext context) {
-    _context = context;
-    _locale.changeLocale(context.locale);
-  }
-
-  void addLocale(CheckitErrorsBase locale) {
-    _locale.addLocale(locale);
-  }
-
-  void setLocale(String locale) {
-    _locale.changeLocale(locale);
-    _updateContext(
-      locale: _locale.defaultLocaleKey,
-      errors: _locale.getDefault(),
-    );
-  }
-
-  void setResource(ValidationResources resources) {
-    _updateContext(resources: resources);
-  }
-
-  void _updateContext({
-    String? locale,
-    CheckitErrorsBase? errors,
-    ValidationResourcesBase? resources,
-  }) {
-    _context = _context.copyWith(
-      locale: locale,
-      errors: errors,
-      resources: resources,
-    );
-  }
-
-  void addValidators(List<Validator<T>> validators) {
+  void _addValidators(List<Validator<T>> validators) {
     _validators.addAll(validators);
   }
 
-  void clearNode() {
-    _validators.clear();
-  }
+  /* void addValidator(Validator<T> validator) {
+    _validators.add(validator);
+  } */
 
   /// Быстрая проверка значений без сохранения билдера
-  ValidationResult validateOnce(T value, {bool? stopOnFirstError}) =>
+  ValidationResult validateOnce(T? value, {bool? stopOnFirstError}) =>
       build().validate(value, stopOnFirstError: stopOnFirstError);
 
   /// Клонирование узла с независимыми валидаторами и контекстом
-  ValidatorNode<T> clone();
+  ValidatorNode<T> clone({ValidationContext? context});
 
-  ValidatorSet<T> build() {
+  /// Клонирование узла с новой конфигурацией
+  ValidatorNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
+  }
+
+  ValidatorSet<T> build({ValidationContext? context}) {
+    final c = context ?? _context;
     return ValidatorSet<T>(
       validators: List.unmodifiable(_validators),
-      context: _context,
-      stopOnFirstError: stopOnFirstError,
+      context: c,
+      stopOnFirstError: c.stopOnFirstError,
     );
-  }
-}
-
-class IpNode<T extends String> extends ValidatorNode<T> {
-  IpNode(super.locale);
-
-  @override
-  IpNode<T> clone() {
-    final clone = IpNode<T>(_locale);
-    clone.addValidators(List.of(_validators));
-    return clone;
-  }
-
-  IpNode v4({String? error}) {
-    _validators.add(IpValidator.v4(error: error));
-
-    return this;
-  }
-
-  IpNode v6({String? error}) {
-    _validators.add(IpValidator.v6(error: error));
-
-    return this;
   }
 }
 
 class StringDateNode<T extends String> extends ValidatorNode<T> {
-  StringDateNode(super.locale);
+  StringDateNode(super._context);
 
   @override
-  StringDateNode<T> clone() {
-    final clone = StringDateNode<T>(_locale);
-    clone.addValidators(List.of(_validators));
+  StringDateNode<T> clone({ValidationContext? context}) {
+    final clone = StringDateNode<T>(context ?? _context);
+    clone._addValidators(List.of(_validators));
     return clone;
   }
 
@@ -217,12 +218,12 @@ class StringDateNode<T extends String> extends ValidatorNode<T> {
 }
 
 class NumNode<T extends num> extends ValidatorNode<T> {
-  NumNode(super.locale);
+  NumNode(super._context);
 
   @override
-  NumNode<T> clone() {
-    final clone = NumNode<T>(_locale);
-    clone.addValidators(List.of(_validators));
+  NumNode<T> clone({ValidationContext? context}) {
+    final clone = NumNode<T>(context ?? _context);
+    clone._addValidators(List.of(_validators));
     return clone;
   }
 
@@ -258,12 +259,12 @@ class NumNode<T extends num> extends ValidatorNode<T> {
 }
 
 class PasswordNode<T extends String> extends ValidatorNode<T> {
-  PasswordNode(super._locale);
+  PasswordNode(super._config);
 
   @override
-  PasswordNode<T> clone() {
-    final clone = PasswordNode<T>(_locale);
-    clone.addValidators(List.of(_validators));
+  PasswordNode<T> clone({ValidationContext? context}) {
+    final clone = PasswordNode<T>(context ?? _context);
+    clone._addValidators(List.of(_validators));
     return clone;
   }
 
@@ -325,36 +326,36 @@ class PasswordNode<T extends String> extends ValidatorNode<T> {
 }
 
 class StringNode<T extends String> extends ValidatorNode<T> {
-  StringNode(super.locale);
+  StringNode(super._config);
 
   PasswordNode password() {
-    return PasswordNode(_locale);
+    return PasswordNode(_context);
   }
 
   StringDateNode dateTime(String format) {
-    final stringDateNode = StringDateNode(_locale);
-    stringDateNode.addValidators([StringDateValidator.dateTime(format)]);
+    final stringDateNode = StringDateNode(_context);
+    stringDateNode._addValidators([StringDateValidator.dateTime(format)]);
     return stringDateNode;
   }
 
   StringDateNode dateTimeAuto({String? preferredFormat}) {
-    final stringDateNode = StringDateNode(_locale);
-    stringDateNode.addValidators([
+    final stringDateNode = StringDateNode(_context);
+    stringDateNode._addValidators([
       StringDateValidator.dateTimeAuto(preferredFormat: preferredFormat),
     ]);
     return stringDateNode;
   }
 
   StringDateNode dateTimeIso() {
-    final stringDateNode = StringDateNode(_locale);
-    stringDateNode.addValidators([StringDateValidator.dateTimeIso()]);
+    final stringDateNode = StringDateNode(_context);
+    stringDateNode._addValidators([StringDateValidator.dateTimeIso()]);
     return stringDateNode;
   }
 
   @override
-  StringNode<T> clone() {
-    final clone = StringNode<T>(_locale);
-    clone.addValidators(List.of(_validators));
+  StringNode<T> clone({ValidationContext? context}) {
+    final clone = StringNode<T>(context ?? _context);
+    clone._addValidators(List.of(_validators));
     return clone;
   }
 
@@ -401,8 +402,84 @@ class StringNode<T extends String> extends ValidatorNode<T> {
   }
 
   IpNode ip() {
-    final ipNode = IpNode(_locale);
-    ipNode.addValidators([IpValidator.ip()]);
+    final ipNode = IpNode(_context);
+    ipNode._addValidators([IpValidator.ip()]);
     return ipNode;
+  }
+
+  SubnetNode subnet(String cidr) {
+    final subnetNode = SubnetNode(_context);
+    subnetNode._addValidators([SubnetValidator.subnet(cidr)]);
+    return subnetNode;
+  }
+}
+
+class IpNode<T extends String> extends ValidatorNode<T> {
+  IpNode(super._config);
+
+  @override
+  IpNode<T> clone({ValidationContext? context}) {
+    final clone = IpNode<T>(context ?? _context);
+    clone._addValidators(List.of(_validators));
+    return clone;
+  }
+
+  IpNode v4({String? error}) {
+    _validators.add(IpValidator.v4(error: error));
+
+    return this;
+  }
+
+  IpNode v6({String? error}) {
+    _validators.add(IpValidator.v6(error: error));
+
+    return this;
+  }
+
+  IpNode inSubnet(String cidr, {String? error}) {
+    _validators.add(IpValidator.inSubnet(cidr, error: error));
+
+    return this;
+  }
+
+  IpNode linkLocal({String? error}) {
+    _validators.add(IpValidator.linkLocal(error: error));
+
+    return this;
+  }
+
+  IpNode localhost({String? error}) {
+    _validators.add(IpValidator.localhost(error: error));
+
+    return this;
+  }
+
+  IpNode loopback({String? error}) {
+    _validators.add(IpValidator.loopback(error: error));
+
+    return this;
+  }
+
+  IpNode range(String startIp, String endIp, {String? error}) {
+    _validators.add(IpValidator.range(startIp, endIp, error: error));
+
+    return this;
+  }
+}
+
+class SubnetNode<T extends String> extends ValidatorNode<T> {
+  SubnetNode(super._locale);
+
+  @override
+  SubnetNode<T> clone({ValidationContext? context}) {
+    final clone = SubnetNode<T>(context ?? _context);
+    clone._addValidators(List.of(_validators));
+    return clone;
+  }
+
+  SubnetNode contains(String ip, {String? error}) {
+    _validators.add(SubnetValidator.contains(ip, error: error));
+
+    return this;
   }
 }

@@ -1,46 +1,64 @@
-import 'dart:io';
-import 'dart:isolate';
-
+import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:checkit/checkit.dart';
+import 'package:checkit/src/checkit.dart';
 import 'package:validart/validart.dart';
 
 final testInputs = List<String>.generate(10000, (i) {
-  if (i % 4 == 0) return 'valid.email$i@example.com';
+  if (i % 4 == 0) return '192.168.1.1';
   if (i % 4 == 1) return '   ';
-  if (i % 4 == 2) return 'user%example.com';
-  return 'verylongemailstringthatgoesonandonandonandonandonandonandon@example.com';
+  if (i % 4 == 2) return '2001:db8::ff00:42:8329';
+  return '999.999.999.999';
 });
 
-Future<int> measureMemory(void Function() testFn) async {
-  final receivePort = ReceivePort();
+class CheckitBenchmark extends BenchmarkBase {
+  CheckitBenchmark() : super('Checkit');
 
-  await Isolate.spawn((SendPort port) {
-    testFn();
-    port.send(ProcessInfo.currentRss); // Потребление памяти в байтах
-  }, receivePort.sendPort);
+  final validator = Checkit.string.ip().build();
 
-  final memoryUsage = await receivePort.first as int;
-  return memoryUsage;
-}
-
-void validator1() {
-  final validator = Checkit.string.email().min(6).max(34).build();
-  for (final input in testInputs) {
-    validator.validate(input);
+  @override
+  void run() {
+    for (final input in testInputs) {
+      validator.validate(input);
+    }
   }
 }
 
-void validator2() {
-  final validator = Validart().string().email().min(6).max(34);
-  for (final input in testInputs) {
-    validator.validate(input);
+class CheckitBenchmarkWithOptimization extends BenchmarkBase {
+  CheckitBenchmarkWithOptimization() : super('Checkit');
+
+  final validator =
+      Checkit.string
+          .ip()
+          .withContext(
+            Checkit.config.copyWith(usePermanentCache: true).buildContext(),
+          )
+          .build();
+
+  @override
+  void run() {
+    for (final input in testInputs) {
+      validator.validate(input);
+    }
   }
 }
 
-void main() async {
-  final mem1 = await measureMemory(validator1);
-  final mem2 = await measureMemory(validator2);
+class ValidartBenchmark extends BenchmarkBase {
+  ValidartBenchmark() : super('Validart');
 
-  print('Validator1 использовал ~${mem1 ~/ 1024} KB');
-  print('Validator2 использовал ~${mem2 ~/ 1024} KB');
+  final validator = Validart().string().ip();
+
+  @override
+  void run() {
+    for (final input in testInputs) {
+      validator.validate(input);
+    }
+  }
+}
+
+void main() {
+  print('Running benchmark...\n');
+
+  ValidartBenchmark().report();
+  CheckitBenchmark().report();
+  CheckitBenchmarkWithOptimization().report();
 }

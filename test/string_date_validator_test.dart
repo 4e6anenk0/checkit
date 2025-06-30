@@ -1,5 +1,4 @@
 import 'package:checkit/checkit.dart';
-import 'package:checkit/src/resources/string_date_parser.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -19,12 +19,9 @@ class UkNumErrors implements NumCheckitErrorsBase {
       "Значення має бути не у діапазоні між $min та $max";
 }
 
-class MyErrors implements CheckitErrorsBase {
+class MyErrors implements ICheckitErrors {
   @override
   GeneralCheckitErrors get generalErrors => GeneralCheckitErrors();
-
-  @override
-  String get locale => 'uk';
 
   @override
   NumCheckitErrorsBase get numErrors => UkNumErrors();
@@ -47,11 +44,12 @@ void main() {
   final validator = AndValidator(
     [NumValidator.min(10), NumValidator.max(20)],
     ValidationContext(
-      locale: 'uk',
       errors: MyErrors(),
       warnings: Warnings(),
       resources: ValidationResources(),
       caseHandling: CaseHandling.exact,
+      usePermanentCache: false,
+      stopOnFirstError: false,
     ),
   );
 

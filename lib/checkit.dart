@@ -4,7 +4,6 @@
 library;
 
 export 'src/validators/validators.dart';
-export 'src/validation_result.dart';
 export 'src/validation_resources.dart';
 export 'src/validation_context.dart';
 export 'src/checkit.dart';

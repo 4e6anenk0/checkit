@@ -2,35 +2,35 @@ import 'validator.dart';
 
 abstract class PasswordValidator {
   static Validator<String> hasUppercase({String? error}) => (value, context) {
-    if (context.resources.patterns.uppercaseLetterPattern.hasMatch(value)) {
+    if (context.resources.uppercaseLetterPattern.hasMatch(value)) {
       return (true, null);
     }
     return (false, error ?? context.errors.passwordErrors.hasUppercase());
   };
 
   static Validator<String> hasLowercase({String? error}) => (value, context) {
-    if (context.resources.patterns.lowercaseLetterPattern.hasMatch(value)) {
+    if (context.resources.lowercaseLetterPattern.hasMatch(value)) {
       return (true, null);
     }
     return (false, error ?? context.errors.passwordErrors.hasLowercase());
   };
 
   static Validator<String> hasDigit({String? error}) => (value, context) {
-    if (context.resources.patterns.digitPattern.hasMatch(value)) {
+    if (context.resources.digitPattern.hasMatch(value)) {
       return (true, null);
     }
     return (false, error ?? context.errors.passwordErrors.hasDigit());
   };
 
   static Validator<String> noSpace({String? error}) => (value, context) {
-    if (!context.resources.patterns.spacePattern.hasMatch(value)) {
+    if (!context.resources.spacePattern.hasMatch(value)) {
       return (true, null);
     }
     return (false, error ?? context.errors.passwordErrors.noSpace());
   };
 
   static Validator<String> hasLetter({String? error}) => (value, context) {
-    if (context.resources.patterns.letterPattern.hasMatch(value)) {
+    if (context.resources.letterPattern.hasMatch(value)) {
       return (true, null);
     }
     return (false, error ?? context.errors.passwordErrors.hasLetter());
@@ -57,7 +57,7 @@ abstract class PasswordValidator {
               'specialChars',
               buildSpecialCharPattern(allowedChars),
             )
-            : context.resources.patterns.specialCharsPattern;
+            : context.resources.specialCharsPattern;
 
     if (pattern.hasMatch(value)) {
       return (true, null);
