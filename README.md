@@ -3,8 +3,6 @@
 
 **Checkit** is a modular, extensible validation library for Dart. It supports validation chains, localization, custom rules, and flexible configuration. Perfect for both client and server use cases.
 
----
-
 ### ✨ Features
 
 * Simple and readable builder-style API
@@ -13,8 +11,6 @@
 * String, number, date, IP, password, subnet validators
 * Global and per-instance configuration
 * Easy to extend and integrate
-
----
 
 ## 🚀 Quick Start
 
@@ -42,8 +38,6 @@ if (result.isValid) {
   print("Error: ${result.errors}");
 }
 ```
-
----
 
 ## 🔧 Built-in Validators
 
@@ -95,8 +89,6 @@ Checkit.string.ip().v4().validateOnce("192.168.0.1");
 Checkit.string.subnet("192.168.0.0/24").contains("192.168.0.42");
 ```
 
----
-
 ## ⚙️ Configuration
 
 You can globally configure Checkit:
@@ -115,8 +107,6 @@ final context = Checkit.config.copyWith(stopOnFirstError: false).buildContext();
 Checkit.string.withContext(context).min(5).validateOnce("test");
 ```
 
----
-
 ## 🌍 Localization
 
 Checkit uses English error messages by default. You can provide your own:
@@ -128,8 +118,6 @@ Checkit.config = ValidatorConfig(
 ```
 
 You can also integrate `intl` using an optional `checkit_intl` package (planned).
-
----
 
 ## 🧩 Custom Validators
 
@@ -149,8 +137,6 @@ class CustomValidator {
 Checkit.string.custom(CustomValidator.onlyLowercase(), error: "Lowercase only");
 ```
 
----
-
 ## 🧪 Testing
 
 ```dart
@@ -159,8 +145,6 @@ final result = Checkit.string.min(5).validateOnce("hi");
 expect(result.isValid, false);
 expect(result.errors.first.message, contains("Minimum 5 characters"));
 ```
-
----
 
 ## 📁 Library Structure
 
@@ -171,8 +155,6 @@ expect(result.errors.first.message, contains("Minimum 5 characters"));
 * `ValidatorSet` — Set of validators
 * `ValidatorNode<T>` — Builder-style chain
 
----
-
 ## 📌 TODO / Roadmap
 
 * ✅ Custom rules support
@@ -182,10 +164,7 @@ expect(result.errors.first.message, contains("Minimum 5 characters"));
 * ⏳ Locale auto-generation
 * ⏳ Async validation support
 
----
-
 ## ❤️ Author
 
 Crafted with care and a focus on performance.
 Contributions, issues, and stars are always welcome!
-
