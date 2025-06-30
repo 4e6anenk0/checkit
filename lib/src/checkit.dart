@@ -103,7 +103,7 @@ class ValidatorSet<T> {
 /// Base class for all validator nodes (string, number, IP, etc).
 ///
 /// Provides chaining, cloning, and conversion to `ValidatorSet`.
-abstract class ValidatorNode<T> {
+abstract class ValidatorNode<T, Self extends ValidatorNode<T, Self>> {
   ValidatorNode(this._context);
 
   final ValidationContext _context;
@@ -111,28 +111,19 @@ abstract class ValidatorNode<T> {
   final List<Validator<T>> _validators = [];
 
   /// Negates another validator.
-  ValidatorNode<T> not(Validator<T> validator, {String? error}) {
+  Self not(Validator<T> validator, {String? error}) {
     _validators.add(GeneralValidator.not(validator, error: error));
 
-    return this;
-  }
-
-  /// Combines this validator with another using logical OR.
-  ValidatorNode or(Validator<T> validator) {
-    _validators.add(
-      GeneralValidator.wrapAdvanced(OrValidator<T>([validator], _context)),
-    );
-
-    return this;
+    return this as Self;
   }
 
   /// Adds a custom validator using a function.
-  ValidatorNode custom(
+  Self custom(
     bool Function(T value, ValidationContext context) validate, {
     String error = '',
   }) {
     _validators.add(GeneralValidator.custom(validate, error: error));
-    return this;
+    return this as Self;
   }
 
   void _addValidators(List<Validator<T>> validators) {
@@ -144,12 +135,10 @@ abstract class ValidatorNode<T> {
       build().validate(value, stopOnFirstError: stopOnFirstError);
 
   /// Clones this node with an optional different context.
-  ValidatorNode<T> clone({ValidationContext? context});
+  Self clone({ValidationContext? context});
 
   /// Shortcut to clone with updated context.
-  ValidatorNode<T> withContext(ValidationContext context) {
-    return clone(context: context);
-  }
+  Self withContext(ValidationContext context);
 
   /// Finalizes the validator into a reusable set.
   ValidatorSet<T> build({ValidationContext? context}) {
@@ -173,7 +162,8 @@ abstract class ValidatorNode<T> {
 ///   .notFuture()
 ///   .minYear(2000);
 /// ```
-class StringDateNode<T extends String> extends ValidatorNode<T> {
+class StringDateNode<T extends String>
+    extends ValidatorNode<T, StringDateNode<T>> {
   StringDateNode(super._context);
 
   @override
@@ -252,6 +242,11 @@ class StringDateNode<T extends String> extends ValidatorNode<T> {
 
     return this;
   }
+
+  @override
+  StringDateNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
+  }
 }
 
 /// Fluent validator for `num` values (int/double).
@@ -262,7 +257,7 @@ class StringDateNode<T extends String> extends ValidatorNode<T> {
 /// ```dart
 /// Checkit.num.min(1).max(10).validateOnce(5);
 /// ```
-class NumNode<T extends num> extends ValidatorNode<T> {
+class NumNode<T extends num> extends ValidatorNode<T, NumNode<T>> {
   NumNode(super._context);
 
   @override
@@ -273,38 +268,43 @@ class NumNode<T extends num> extends ValidatorNode<T> {
   }
 
   /// Minimum allowed value.
-  NumNode min(int min, {String? error}) {
+  NumNode<T> min(int min, {String? error}) {
     _validators.add(NumValidator.min(min, error: error));
 
     return this;
   }
 
   /// Maximum allowed value.
-  NumNode max(int max, {String? error}) {
+  NumNode<T> max(int max, {String? error}) {
     _validators.add(NumValidator.max(max, error: error));
 
     return this;
   }
 
   /// Requires a positive number (> 0).
-  NumNode positive({String? error}) {
+  NumNode<T> positive({String? error}) {
     _validators.add(NumValidator.positive(error: error));
 
     return this;
   }
 
   /// Requires a negative number (< 0).
-  NumNode negative({String? error}) {
+  NumNode<T> negative({String? error}) {
     _validators.add(NumValidator.negative(error: error));
 
     return this;
   }
 
   /// Requires number to be in a specific range (inclusive).
-  NumNode range(int min, int max, {String? error}) {
+  NumNode<T> range(int min, int max, {String? error}) {
     _validators.add(NumValidator.range(min, max, error: error));
 
     return this;
+  }
+
+  @override
+  NumNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
   }
 }
 
@@ -321,7 +321,7 @@ class NumNode<T extends num> extends ValidatorNode<T> {
 ///   .hasDigit()
 ///   .validateOnce('P@ssword1');
 /// ```
-class PasswordNode<T extends String> extends ValidatorNode<T> {
+class PasswordNode<T extends String> extends ValidatorNode<T, PasswordNode<T>> {
   PasswordNode(super._config);
 
   @override
@@ -332,49 +332,49 @@ class PasswordNode<T extends String> extends ValidatorNode<T> {
   }
 
   /// Minimum number of characters.
-  PasswordNode max(int length, {String? error}) {
+  PasswordNode<T> max(int length, {String? error}) {
     _validators.add(StringValidator.max(length, error: error));
 
     return this;
   }
 
   /// Maximum number of characters.
-  PasswordNode min(int length, {String? error}) {
+  PasswordNode<T> min(int length, {String? error}) {
     _validators.add(StringValidator.min(length, error: error));
 
     return this;
   }
 
   /// Requires at least one uppercase letter (A-Z).
-  PasswordNode hasUppercase({String? error}) {
+  PasswordNode<T> hasUppercase({String? error}) {
     _validators.add(PasswordValidator.hasUppercase(error: error));
 
     return this;
   }
 
   /// Requires at least one lowercase letter (a-z).
-  PasswordNode hasLowercase({String? error}) {
+  PasswordNode<T> hasLowercase({String? error}) {
     _validators.add(PasswordValidator.hasLowercase(error: error));
 
     return this;
   }
 
   /// Requires at least one digit (0-9).
-  PasswordNode hasDigit({String? error}) {
+  PasswordNode<T> hasDigit({String? error}) {
     _validators.add(PasswordValidator.hasDigit(error: error));
 
     return this;
   }
 
   /// Requires at least one letter (A-Z or a-z).
-  PasswordNode hasLetter({String? error}) {
+  PasswordNode<T> hasLetter({String? error}) {
     _validators.add(PasswordValidator.hasLetter(error: error));
 
     return this;
   }
 
   /// Disallows whitespace characters.
-  PasswordNode noSpace({String? error}) {
+  PasswordNode<T> noSpace({String? error}) {
     _validators.add(PasswordValidator.noSpace(error: error));
 
     return this;
@@ -383,7 +383,7 @@ class PasswordNode<T extends String> extends ValidatorNode<T> {
   /// Requires at least one special character.
   ///
   /// You can customize allowed characters with [allowedChars].
-  PasswordNode hasSpecial({String? allowedChars, String? error}) {
+  PasswordNode<T> hasSpecial({String? allowedChars, String? error}) {
     _validators.add(
       PasswordValidator.hasSpecial(allowedChars: allowedChars, error: error),
     );
@@ -392,10 +392,15 @@ class PasswordNode<T extends String> extends ValidatorNode<T> {
   }
 
   /// Requires at least one character from a custom [symbols] set.
-  PasswordNode hasSymbols(String symbols, {String? error}) {
+  PasswordNode<T> hasSymbols(String symbols, {String? error}) {
     _validators.add(StringValidator.hasSymbols(symbols, error: error));
 
     return this;
+  }
+
+  @override
+  PasswordNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
   }
 }
 
@@ -415,7 +420,7 @@ class PasswordNode<T extends String> extends ValidatorNode<T> {
 ///   print(result.firstError);
 /// }
 /// ```
-class StringNode<T extends String> extends ValidatorNode<T> {
+class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
   StringNode(super._config);
 
   /// Returns a [PasswordNode] with password-specific validation rules.
@@ -474,49 +479,49 @@ class StringNode<T extends String> extends ValidatorNode<T> {
   }
 
   /// Validates that the string is a valid email address.
-  StringNode email({String? error}) {
+  StringNode<T> email({String? error}) {
     _validators.add(StringValidator.email(error: error));
 
     return this;
   }
 
   /// Validates that the string's length is between [min] and [max].
-  StringNode range(int min, int max, {String? error}) {
+  StringNode<T> range(int min, int max, {String? error}) {
     _validators.add(StringValidator.range(min, max, error: error));
 
     return this;
   }
 
   /// Validates that the string has at least [length] characters.
-  StringNode min(int length, {String? error}) {
+  StringNode<T> min(int length, {String? error}) {
     _validators.add(StringValidator.min(length, error: error));
 
     return this;
   }
 
   /// Validates that the string has no more than [length] characters.
-  StringNode max(int length, {String? error}) {
+  StringNode<T> max(int length, {String? error}) {
     _validators.add(StringValidator.max(length, error: error));
 
     return this;
   }
 
   /// Validates that the string contains at least one of the provided [symbols].
-  StringNode hasSymbols(String symbols, {String? error}) {
+  StringNode<T> hasSymbols(String symbols, {String? error}) {
     _validators.add(StringValidator.hasSymbols(symbols, error: error));
 
     return this;
   }
 
   /// Validates that the string ends with the provided [suffix].
-  StringNode endsWith(String suffix, {String? error}) {
+  StringNode<T> endsWith(String suffix, {String? error}) {
     _validators.add(StringValidator.endsWith(suffix, error: error));
 
     return this;
   }
 
   /// Validates that the string starts with the provided [prefix].
-  StringNode startsWith(String suffix, {String? error}) {
+  StringNode<T> startsWith(String suffix, {String? error}) {
     _validators.add(StringValidator.startsWith(suffix, error: error));
 
     return this;
@@ -545,6 +550,11 @@ class StringNode<T extends String> extends ValidatorNode<T> {
     subnetNode._addValidators([SubnetValidator.subnet(cidr)]);
     return subnetNode;
   }
+
+  @override
+  StringNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
+  }
 }
 
 /// Validates that a string represents a valid IP address.
@@ -555,7 +565,7 @@ class StringNode<T extends String> extends ValidatorNode<T> {
 /// ```dart
 /// Checkit.string.ip().v4().validateOnce('192.168.1.1');
 /// ```
-class IpNode<T extends String> extends ValidatorNode<T> {
+class IpNode<T extends String> extends ValidatorNode<T, IpNode<T>> {
   IpNode(super._config);
 
   @override
@@ -566,52 +576,57 @@ class IpNode<T extends String> extends ValidatorNode<T> {
   }
 
   /// Requires IPv4 format (e.g. 192.168.1.1).
-  IpNode v4({String? error}) {
+  IpNode<T> v4({String? error}) {
     _validators.add(IpValidator.v4(error: error));
 
     return this;
   }
 
   /// Requires IPv6 format.
-  IpNode v6({String? error}) {
+  IpNode<T> v6({String? error}) {
     _validators.add(IpValidator.v6(error: error));
 
     return this;
   }
 
   /// Requires the IP to be in a given subnet (CIDR).
-  IpNode inSubnet(String cidr, {String? error}) {
+  IpNode<T> inSubnet(String cidr, {String? error}) {
     _validators.add(IpValidator.inSubnet(cidr, error: error));
 
     return this;
   }
 
   /// Requires the IP to be link-local.
-  IpNode linkLocal({String? error}) {
+  IpNode<T> linkLocal({String? error}) {
     _validators.add(IpValidator.linkLocal(error: error));
 
     return this;
   }
 
   /// Requires the IP to be localhost (127.0.0.1 or ::1).
-  IpNode localhost({String? error}) {
+  IpNode<T> localhost({String? error}) {
     _validators.add(IpValidator.localhost(error: error));
 
     return this;
   }
 
   /// Requires the IP to be a loopback address.
-  IpNode loopback({String? error}) {
+  IpNode<T> loopback({String? error}) {
     _validators.add(IpValidator.loopback(error: error));
 
     return this;
   }
 
   /// Requires the IP to be in a specific range.
-  IpNode range(String startIp, String endIp, {String? error}) {
+  IpNode<T> range(String startIp, String endIp, {String? error}) {
     _validators.add(IpValidator.range(startIp, endIp, error: error));
 
     return this;
+  }
+
+  @override
+  IpNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
   }
 }
 
@@ -621,7 +636,7 @@ class IpNode<T extends String> extends ValidatorNode<T> {
 /// ```dart
 /// Checkit.string.subnet('192.168.0.0/24').contains('192.168.0.10');
 /// ```
-class SubnetNode<T extends String> extends ValidatorNode<T> {
+class SubnetNode<T extends String> extends ValidatorNode<T, SubnetNode<T>> {
   SubnetNode(super._locale);
 
   @override
@@ -632,9 +647,14 @@ class SubnetNode<T extends String> extends ValidatorNode<T> {
   }
 
   /// Requires the subnet to contain the given [ip].
-  SubnetNode contains(String ip, {String? error}) {
+  SubnetNode<T> contains(String ip, {String? error}) {
     _validators.add(SubnetValidator.contains(ip, error: error));
 
     return this;
+  }
+
+  @override
+  SubnetNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
   }
 }

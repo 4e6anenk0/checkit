@@ -49,14 +49,16 @@ class ValidationContext {
     Warnings? warnings,
     ValidationResourcesBase? resources,
     CaseHandling? caseHandling,
+    bool? usePermanentCache,
+    bool? stopOnFirstError,
   }) {
     return ValidationContext(
       errors: errors ?? this.errors,
       warnings: warnings ?? this.warnings,
       resources: resources ?? this.resources,
       caseHandling: caseHandling ?? this.caseHandling,
-      usePermanentCache: false,
-      stopOnFirstError: false,
+      usePermanentCache: usePermanentCache ?? this.usePermanentCache,
+      stopOnFirstError: stopOnFirstError ?? this.stopOnFirstError,
     );
   }
 }

@@ -89,6 +89,57 @@ Checkit.string.ip().v4().validateOnce("192.168.0.1");
 Checkit.string.subnet("192.168.0.0/24").contains("192.168.0.42");
 ```
 
+Вот пример раздела для `README.md`, который красиво раскрывает идею **инверсии валидаторов**:
+
+---
+
+## 🔁 Inverting Validators with `.not()`
+
+Checkit supports expressive validation chains — including the ability to **invert any validator** using the `.not(...)` method. This allows you to declare what a value **must not** contain in a readable, declarative way.
+
+### Use Case: Excluding Specific Characters in a Password
+
+For example, imagine you want to validate that a password **must contain** certain characters (e.g., "B", "C", "D"), but **must not contain** "A" or "F". With Checkit, this becomes simple and expressive:
+
+```dart
+void main() {
+  final validator = Checkit.string
+      .password()
+      .not(StringValidator.hasSymbols('A'), error: 'Value must not be A')
+      .hasSymbols('B')
+      .hasSymbols('C')
+      .hasSymbols('D')
+      .not(StringValidator.hasSymbols('F'), error: 'Value must not be F');
+
+  final password = 'ABCDEF';
+  final result = validator.validateOnce(password);
+
+  result.prettyPrint();
+}
+```
+
+### 💡 Output
+
+```
+❌ Invalid
+  1. Value must not be A
+  2. Value must not be F
+```
+
+### 🧠 Behind the Scenes
+
+Any standard validator can be inverted via:
+
+```dart
+.not(validator, error: 'Custom error message')
+```
+
+This feature enables:
+
+* **Negation logic** in clean chains (no need for custom predicates).
+* **Complex logical flows** (e.g., "must be one of... but not...").
+* **Safe composition** of reusable validator modules.
+
 ## ⚙️ Configuration
 
 You can globally configure Checkit:
@@ -161,8 +212,6 @@ expect(result.errors.first.message, contains("Minimum 5 characters"));
 * ✅ Localization support
 * ⏳ `intl` integration
 * ⏳ Flutter adapter (AppLocalizations integration)
-* ⏳ Locale auto-generation
-* ⏳ Async validation support
 
 ## ❤️ Author
 

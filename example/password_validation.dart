@@ -1,4 +1,5 @@
 import 'package:checkit/checkit.dart';
+import 'package:checkit/checkit_core.dart';
 
 void main() {
   final validator = Checkit.string
@@ -11,7 +12,7 @@ void main() {
       .noSpace()
       .hasSpecial(allowedChars: '@#\$%&*()-_+=!');
 
-  final password = '1234-fF';
+  final password = '1245-fF';
   final result = validator.validateOnce(password);
 
   result.prettyPrint();
