@@ -7,10 +7,10 @@
 
 * Simple and readable builder-style API
 * Custom validators
-* Localization support
-* String, number, date, IP, password, subnet validators
-* Global and per-instance configuration
+* Localization support with easy customization
+* String, num, int, double, string-date, datetime, IP, password and subnet validators
 * Easy to extend and integrate
+* Zero dependencies (pure Dart)
 
 ## 🚀 Quick Start
 
