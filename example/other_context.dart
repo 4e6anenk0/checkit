@@ -3,10 +3,10 @@ import 'package:checkit/checkit_core.dart';
 
 class UkNumErrors implements NumCheckitErrorsBase {
   @override
-  max(int max) => "Значення має бути не більше ніж $max";
+  max(num max) => "Значення має бути не більше ніж $max";
 
   @override
-  min(int min) => "Значення має бути не менше ніж $max";
+  min(num min) => "Значення має бути не менше ніж $max";
 
   @override
   negative() => "Значення має бути позитивним";
@@ -15,8 +15,11 @@ class UkNumErrors implements NumCheckitErrorsBase {
   positive() => "Значення має бути негативним";
 
   @override
-  range(int min, int max) =>
+  range(num min, num max, {bool includeMin = true, bool includeMax = true}) =>
       "Значення має бути не у діапазоні між $min та $max";
+
+  @override
+  multiple(num factor) => "";
 }
 
 class MyErrors implements ICheckitErrors {
@@ -38,6 +41,12 @@ class MyErrors implements ICheckitErrors {
 
   @override
   IpCheckitErrorsBase get ipErrors => IpCheckitErrors();
+
+  @override
+  DoubleCheckitErrorsBase get doubleErrors => DoubleCheckitErrors();
+
+  @override
+  IntCheckitErrorsBase get intErrors => IntCheckitErrors();
 }
 
 void main() {

@@ -19,6 +19,12 @@ abstract class Checkit {
 
   /// Creates a NumNode validator.
   static NumNode get num => NumNode(config.buildContext());
+
+  static IntNode get int => IntNode(config.buildContext());
+
+  static DoubleNode get double => DoubleNode(config.buildContext());
+
+  static DateTimeNode get dateTime => DateTimeNode(config.buildContext());
 }
 
 /// Global configuration for validation behavior.

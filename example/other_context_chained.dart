@@ -3,10 +3,10 @@ import 'package:checkit/checkit_core.dart';
 
 class UkNumErrors implements NumCheckitErrorsBase {
   @override
-  max(int max) => "Значення має бути не більше ніж $max";
+  max(num max) => "Значення має бути не більше ніж $max";
 
   @override
-  min(int min) => "Значення має бути не менше ніж $max";
+  min(num min) => "Значення має бути не менше ніж $max";
 
   @override
   negative() => "Значення має бути позитивним";
@@ -15,16 +15,19 @@ class UkNumErrors implements NumCheckitErrorsBase {
   positive() => "Значення  має бути негативним";
 
   @override
-  range(int min, int max) =>
+  multiple(num factor) => '';
+
+  @override
+  range(num min, num max, {bool includeMin = true, bool includeMax = true}) =>
       "Значення має бути не у діапазоні між $min та $max";
 }
 
 class EsNumErrors implements NumCheckitErrorsBase {
   @override
-  max(int max) => "El valor debe ser menor o igual que $max";
+  max(num max) => "El valor debe ser menor o igual que $max";
 
   @override
-  min(int min) => "El valor debe ser mayor o igual que $min";
+  min(num min) => "El valor debe ser mayor o igual que $min";
 
   @override
   negative() => "El valor debe ser negativo";
@@ -33,7 +36,11 @@ class EsNumErrors implements NumCheckitErrorsBase {
   positive() => "El valor debe ser positivo";
 
   @override
-  range(int min, int max) => "El valor debe estar entre $min y $max";
+  multiple(num factor) => '';
+
+  @override
+  range(num min, num max, {bool includeMin = true, bool includeMax = true}) =>
+      "El valor debe estar entre $min y $max";
 }
 
 class UkErrors implements ICheckitErrors {
@@ -54,6 +61,12 @@ class UkErrors implements ICheckitErrors {
 
   @override
   IpCheckitErrorsBase get ipErrors => IpCheckitErrors();
+
+  @override
+  DoubleCheckitErrorsBase get doubleErrors => DoubleCheckitErrors();
+
+  @override
+  IntCheckitErrorsBase get intErrors => IntCheckitErrors();
 }
 
 class EsErrors implements ICheckitErrors {
@@ -74,6 +87,12 @@ class EsErrors implements ICheckitErrors {
 
   @override
   IpCheckitErrorsBase get ipErrors => IpCheckitErrors();
+
+  @override
+  DoubleCheckitErrorsBase get doubleErrors => DoubleCheckitErrors();
+
+  @override
+  IntCheckitErrorsBase get intErrors => IntCheckitErrors();
 }
 
 void main() {

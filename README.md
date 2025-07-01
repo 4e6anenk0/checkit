@@ -1,9 +1,9 @@
 
-## 🛡️ Checkit
+# 🛡️ Checkit
 
 **Checkit** is a modular, extensible validation library for Dart. It supports validation chains, localization, custom rules, and flexible configuration. Perfect for both client and server use cases.
 
-### ✨ Features
+## ✨ Features
 
 * Simple and readable builder-style API
 * Custom validators
@@ -16,9 +16,23 @@
 
 ### Installation
 
+Add the following dependency to your project:
+
 ```yaml
 dependencies:
   checkit: ^1.0.0
+```
+
+Or run via CLI for Dart:
+
+```sh
+dart pub add checkit
+```
+
+Or for Flutter:
+
+```sh
+flutter pub add checkit
 ```
 
 ### Basic Usage
@@ -39,9 +53,23 @@ if (result.isValid) {
 }
 ```
 
+Or even simpler with prettyPrint() method:
+
+```dart
+import 'package:checkit/checkit.dart';
+
+final result = Checkit.string
+  .min(5)
+  .max(10)
+  .email()
+  .validateOnce("example@mail.com");
+
+result.prettyPrint();
+```
+
 ## 🔧 Built-in Validators
 
-### Strings
+### String Validator
 
 ```dart
 Checkit.string
@@ -51,7 +79,27 @@ Checkit.string
   .validateOnce("abc123");
 ```
 
-### Numbers
+Available String Validations:
+
+* min, max, exact, range
+* email
+* alpha, alphanumeric
+* contains, hasSymbols
+* isDouble, isInt,
+* jwt, pattern
+* equals, endsWith, startsWith
+
+Special methods:
+
+* custom, not, clone, withContext, build
+
+And refs to other nodes:
+
+* dateTime, dateTimeAuto, dateTimeIso
+* password
+* ip, subnet
+
+### Number Validator
 
 ```dart
 Checkit.num
@@ -60,7 +108,59 @@ Checkit.num
   .validateOnce(42);
 ```
 
-### Passwords
+Available Num Validations:
+
+* min, max, range
+* positive, negative
+* multiple
+
+Special methods:
+
+* custom, not, clone, withContext, build
+
+### Integer Validator
+
+```dart
+Checkit.int
+  .positive()
+  .range(10, 100)
+  .validateOnce(42);
+```
+
+Available Num Validations:
+
+* min, max, range, rangeWithStep
+* positive, negative
+* multiple
+* digitCount
+* divisibleBy
+* even, odd, prime
+* oneOf
+
+Special methods:
+
+* custom, not, clone, withContext, build
+
+### Double Validator
+
+```dart
+Checkit.double
+  .positive()
+  .range(10, 100)
+  .validateOnce(42);
+```
+
+Available Double Validations:
+
+* min, max, range
+* positive, negative
+* decimal, finite, integer
+
+Special methods:
+
+* custom, not, clone, withContext, build
+
+### Password Validator
 
 ```dart
 Checkit.string
@@ -72,7 +172,18 @@ Checkit.string
   .validateOnce("S3cureP@ss");
 ```
 
-### Dates (from strings)
+Available Password Validations:
+
+* min, max, exact, range
+* hasUppercase, hasLowercase, hasDigit, hasLetter, noSpace, hasSpecial, hasSymbols
+
+Special methods:
+
+* custom, not, clone, withContext, build
+
+### Date Validator (from String)
+
+#### If the format is known
 
 ```dart
 Checkit.string
@@ -81,13 +192,79 @@ Checkit.string
   .validateOnce("2023-12-01");
 ```
 
+#### If the format is unknown
+
+Be careful, as it can determine the month and day values ​​itself through the method for cases when the date does not give an unambiguous correspondence.
+```dart
+
+Checkit.string
+  .dateTimeAuto()
+  .notFuture()
+  .validateOnce("2023/12/01");
+```
+
+Available Date (String) Validations:
+
+* format
+* maxYear, minYear
+* notPast, notFuture
+* before, after, range
+* leapYear
+* iso8601
+
+Special methods:
+
+* custom, not, clone, withContext, build
+
+### DateTime Validator
+
+```dart
+Checkit.dateTime.notFuture().validateOnce(DateTime(2023, 12, 1));
+
+```
+
+Available DateTime Validations:
+
+* maxYear, minYear
+* notPast, notFuture
+* before, after, range
+* leapYear
+
+Special methods:
+
+* custom, not, clone, withContext, build
+
 ### IP & Subnets
 
 ```dart
 Checkit.string.ip().v4().validateOnce("192.168.0.1");
 
+```
+
+Available IP Validations:
+
+* v4, v6
+* inSubnet
+* linkLocal, localhost, loopback
+* range
+
+Special methods:
+
+* custom, not, clone, withContext, build
+
+```dart
 Checkit.string.subnet("192.168.0.0/24").contains("192.168.0.42");
 ```
+
+Available Subnet Validations:
+
+* contains
+
+Special methods:
+
+* custom, not, clone, withContext, build
+
+
 
 ## 🔁 Inverting Validators with `.not()`
 
@@ -125,12 +302,6 @@ Any standard validator can be inverted via:
 ```dart
 .not(validator, error: 'Custom error message')
 ```
-
-This feature enables:
-
-* **Negation logic** in clean chains (no need for custom predicates).
-* **Complex logical flows** (e.g., "must be one of... but not...").
-* **Safe composition** of reusable validator modules.
 
 ## ⚙️ Configuration
 
