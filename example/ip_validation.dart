@@ -15,4 +15,12 @@ void main() {
   final result2 = validator2.validateOnce(address2, stopOnFirstError: true);
 
   result2.prettyPrint();
+
+  final validator3 = Checkit.string.ip();
+
+  final address3 = '::1';
+
+  final result3 = validator3.validateOnce(address3, stopOnFirstError: true);
+
+  result3.prettyPrint();
 }

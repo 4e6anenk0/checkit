@@ -10,6 +10,8 @@ abstract class StringDateCheckitErrorsBase {
   before(String date);
   after(String date);
   leapYear(String date);
+  weekend();
+  weekday();
   iso8601();
 }
 
@@ -51,4 +53,10 @@ class StringDateCheckitErrors extends StringDateCheckitErrorsBase {
 
   @override
   String iso8601() => 'Date must be in ISO 8601 format (e.g., 2023-12-31).';
+
+  @override
+  weekday() => 'The date must be a weekday (Monday to Friday)';
+
+  @override
+  weekend() => 'The date must be a weekend day (Saturday or Sunday)';
 }

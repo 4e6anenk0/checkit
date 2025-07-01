@@ -35,6 +35,8 @@ class ValidatorConfig {
       stringDateErrors: StringDateCheckitErrors(),
       passwordErrors: PasswordCheckitErrors(),
       ipErrors: IpCheckitErrors(),
+      intErrors: IntCheckitErrors(),
+      doubleErrors: DoubleCheckitErrors(),
     ),
     this.warnings = const Warnings(),
     this.caseHandling = CaseHandling.exact,
@@ -118,6 +120,16 @@ abstract class ValidatorNode<T, Self extends ValidatorNode<T, Self>> {
   }
 
   /// Adds a custom validator using a function.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.custom(
+  ///  (value, _) => value == value.split('').reversed.join(),
+  /// );
+  ///
+  /// final palindrome = 'level';
+  /// final result = validator.validateOnce(palindrome);
+  /// ```
   Self custom(
     bool Function(T value, ValidationContext context) validate, {
     String error = '',
@@ -131,16 +143,66 @@ abstract class ValidatorNode<T, Self extends ValidatorNode<T, Self>> {
   }
 
   /// Quick validation without manually building the set.
+  ///
+  /// This is a shortcut to call `.build().validate(...)` directly.
+  /// Runs validation immediately without storing the validator for reuse.
+  /// Useful for one-time checks or quick rules.
+  ///
+  /// - [value] — The value to validate.
+  /// - [stopOnFirstError] — Optional override to stop on the first error.
+  ///   If `true`, stops early when a failure is detected. Otherwise,
+  ///   all validators are checked. Defaults to the value in the context.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final result = Checkit.string
+  ///     .min(3)
+  ///     .max(10)
+  ///     .validateOnce('hello');
+  /// if (result.isValid) print('Valid!');
+  /// ```
   ValidationResult validateOnce(T? value, {bool? stopOnFirstError}) =>
       build().validate(value, stopOnFirstError: stopOnFirstError);
 
   /// Clones this node with an optional different context.
+  ///
+  /// This allows creating independent validator chains with shared logic
+  /// but different behavior depending on the `ValidationContext`.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final baseNode = Checkit.string.min(5);
+  /// final clone = baseNode.clone(context: anotherContext);
+  /// ```
   Self clone({ValidationContext? context});
 
   /// Shortcut to clone with updated context.
+  ///
+  /// Equivalent to `clone(context: ...)`, but more fluent.
+  ///
+  /// - [context] — The new context to use for the returned clone.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final spanishValidator = baseValidator.withContext(spanishContext);
+  /// ```
   Self withContext(ValidationContext context);
 
   /// Finalizes the validator into a reusable set.
+  ///
+  /// Creates a `ValidatorSet` from this node. This is optimized for reuse
+  /// and allows validation logic to be reused without rebuilding chains.
+  ///
+  /// - [context] — Optional override to use a different context for the
+  ///   resulting `ValidatorSet`.
+  ///
+  /// Returns a `ValidatorSet<T>` that can be used repeatedly.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.num.min(1).max(10).build();
+  /// final result = validator.validate(5);
+  /// ```
   ValidatorSet<T> build({ValidationContext? context}) {
     final c = context ?? _context;
     return ValidatorSet<T>(
@@ -155,7 +217,7 @@ abstract class ValidatorNode<T, Self extends ValidatorNode<T, Self>> {
 ///
 /// Supports custom formats, ISO-8601, date ranges, and leap year checks.
 ///
-/// Example:
+/// ### Example:
 /// ```dart
 /// Checkit.string
 ///   .dateTime('yyyy-MM-dd')
@@ -253,7 +315,7 @@ class StringDateNode<T extends String>
 ///
 /// Supports range, positivity, etc.
 ///
-/// Example:
+/// ### Example:
 /// ```dart
 /// Checkit.num.min(1).max(10).validateOnce(5);
 /// ```
@@ -296,8 +358,22 @@ class NumNode<T extends num> extends ValidatorNode<T, NumNode<T>> {
   }
 
   /// Requires number to be in a specific range (inclusive).
-  NumNode<T> range(int min, int max, {String? error}) {
-    _validators.add(NumValidator.range(min, max, error: error));
+  NumNode<T> range(
+    num min,
+    num max, {
+    String? error,
+    bool includeMin = true,
+    bool includeMax = true,
+  }) {
+    _validators.add(
+      NumValidator.range(
+        min,
+        max,
+        error: error,
+        includeMin: includeMin,
+        includeMax: includeMax,
+      ),
+    );
 
     return this;
   }
@@ -312,7 +388,7 @@ class NumNode<T extends num> extends ValidatorNode<T, NumNode<T>> {
 ///
 /// Includes rules like uppercase, digits, special characters, etc.
 ///
-/// Example:
+/// ### Example:
 /// ```dart
 /// final result = Checkit.string
 ///   .password()
@@ -408,7 +484,7 @@ class PasswordNode<T extends String> extends ValidatorNode<T, PasswordNode<T>> {
 ///
 /// Use this class via `Checkit.string` to compose validations in a readable, chained style.
 ///
-/// Example:
+/// ### Example:
 /// ```dart
 /// final result = Checkit.string
 ///   .min(5)
@@ -425,7 +501,7 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
 
   /// Returns a [PasswordNode] with password-specific validation rules.
   ///
-  /// Example:
+  /// ### Example:
   /// ```dart
   /// Checkit.string.password()
   ///   .min(8)
@@ -438,7 +514,7 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
 
   /// Returns a [StringDateNode] that validates a specific date format.
   ///
-  /// Example:
+  /// ### Example:
   /// ```dart
   /// Checkit.string.dateTime('yyyy-MM-dd');
   /// ```
@@ -461,7 +537,7 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
 
   /// Validates an ISO 8601 date-time string.
   ///
-  /// Example:
+  /// ### Example:
   /// ```dart
   /// Checkit.string.dateTimeIso();
   /// ```
@@ -529,7 +605,7 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
 
   /// Switches to IP-specific validation rules.
   ///
-  /// Example:
+  /// ### Example:
   /// ```dart
   /// Checkit.string.ip().v4();
   /// ```
@@ -541,7 +617,7 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
 
   /// Switches to subnet-specific validation rules using CIDR.
   ///
-  /// Example:
+  /// ### Example:
   /// ```dart
   /// Checkit.string.subnet('192.168.1.0/24').contains('192.168.1.10');
   /// ```
@@ -561,7 +637,7 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
 ///
 /// Supports v4/v6, local, range, and subnet checks.
 ///
-/// Example:
+/// ### Example:
 /// ```dart
 /// Checkit.string.ip().v4().validateOnce('192.168.1.1');
 /// ```
@@ -632,7 +708,7 @@ class IpNode<T extends String> extends ValidatorNode<T, IpNode<T>> {
 
 /// Validates that a string represents a subnet that contains a given IP.
 ///
-/// Example:
+/// ### Example:
 /// ```dart
 /// Checkit.string.subnet('192.168.0.0/24').contains('192.168.0.10');
 /// ```
@@ -655,6 +731,257 @@ class SubnetNode<T extends String> extends ValidatorNode<T, SubnetNode<T>> {
 
   @override
   SubnetNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
+  }
+}
+
+class DateTimeNode<T extends DateTime>
+    extends ValidatorNode<T, DateTimeNode<T>> {
+  DateTimeNode(super._context);
+
+  @override
+  DateTimeNode<T> clone({ValidationContext? context}) {
+    final clone = DateTimeNode<T>(context ?? _context);
+    clone._addValidators(List.of(_validators));
+    return clone;
+  }
+
+  /// Maximum allowed year.
+  DateTimeNode maxYear(int max, {String? error}) {
+    _validators.add(DateTimeValidator.maxYear(max, error: error));
+
+    return this;
+  }
+
+  /// Minimum allowed year.
+  DateTimeNode minYear(int min, {String? error}) {
+    _validators.add(DateTimeValidator.minYear(min, error: error));
+
+    return this;
+  }
+
+  /// Date must not be in the past.
+  DateTimeNode notPast({String? error}) {
+    _validators.add(DateTimeValidator.notPast(error: error));
+
+    return this;
+  }
+
+  /// Date must not be in the future.
+  DateTimeNode notFuture({String? error}) {
+    _validators.add(DateTimeValidator.notFuture(error: error));
+
+    return this;
+  }
+
+  /// Date must be before a certain string date.
+  DateTimeNode before(DateTime date, {String? error}) {
+    _validators.add(DateTimeValidator.before(date, error: error));
+
+    return this;
+  }
+
+  /// Date must be after a certain string date.
+  DateTimeNode after(DateTime date, {String? error}) {
+    _validators.add(DateTimeValidator.after(date, error: error));
+
+    return this;
+  }
+
+  /// Date must be within the given range.
+  DateTimeNode range(DateTime start, DateTime end, {String? error}) {
+    _validators.add(DateTimeValidator.range(start, end, error: error));
+
+    return this;
+  }
+
+  /// Requires the date to be a leap year.
+  DateTimeNode leapYear({String? error}) {
+    _validators.add(DateTimeValidator.leapYear(error: error));
+
+    return this;
+  }
+
+  @override
+  DateTimeNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
+  }
+}
+
+class IntNode<T extends int> extends ValidatorNode<T, IntNode<T>> {
+  IntNode(super._context);
+
+  @override
+  IntNode<T> clone({ValidationContext? context}) {
+    final clone = IntNode<T>(context ?? _context);
+    clone._addValidators(List.of(_validators));
+    return clone;
+  }
+
+  /// Minimum allowed value.
+  IntNode<T> min(int min, {String? error}) {
+    _validators.add(NumValidator.min(min, error: error));
+
+    return this;
+  }
+
+  /// Maximum allowed value.
+  IntNode<T> max(int max, {String? error}) {
+    _validators.add(NumValidator.max(max, error: error));
+
+    return this;
+  }
+
+  /// Requires a positive number (> 0).
+  IntNode<T> positive({String? error}) {
+    _validators.add(NumValidator.positive(error: error));
+
+    return this;
+  }
+
+  /// Requires a negative number (< 0).
+  IntNode<T> negative({String? error}) {
+    _validators.add(NumValidator.negative(error: error));
+
+    return this;
+  }
+
+  /// Requires number to be in a specific range (inclusive).
+  IntNode<T> range(int min, int max, {String? error}) {
+    _validators.add(NumValidator.range(min, max, error: error));
+
+    return this;
+  }
+
+  IntNode<T> digitCount(int count, {String? error}) {
+    _validators.add(IntValidator.digitCount(count, error: error));
+
+    return this;
+  }
+
+  IntNode<T> divisibleBy(int divisor, {String? error}) {
+    _validators.add(IntValidator.divisibleBy(divisor, error: error));
+
+    return this;
+  }
+
+  IntNode<T> even({String? error}) {
+    _validators.add(IntValidator.even(error: error));
+
+    return this;
+  }
+
+  IntNode<T> odd({String? error}) {
+    _validators.add(IntValidator.odd(error: error));
+
+    return this;
+  }
+
+  IntNode<T> oneOf(Set<int> allowedValues, {String? error}) {
+    _validators.add(IntValidator.oneOf(allowedValues, error: error));
+
+    return this;
+  }
+
+  IntNode<T> prime({String? error}) {
+    _validators.add(IntValidator.prime(error: error));
+
+    return this;
+  }
+
+  IntNode<T> rangeWithStep(
+    int min,
+    int max,
+    int step, {
+    String? error,
+    bool includeMin = true,
+    bool includeMax = true,
+  }) {
+    _validators.add(
+      IntValidator.rangeWithStep(
+        min,
+        max,
+        step,
+        error: error,
+        includeMin: includeMin,
+        includeMax: includeMax,
+      ),
+    );
+
+    return this;
+  }
+
+  @override
+  IntNode<T> withContext(ValidationContext context) {
+    return clone(context: context);
+  }
+}
+
+class DoubleNode<T extends double> extends ValidatorNode<T, DoubleNode<T>> {
+  DoubleNode(super._context);
+
+  @override
+  DoubleNode<T> clone({ValidationContext? context}) {
+    final clone = DoubleNode<T>(context ?? _context);
+    clone._addValidators(List.of(_validators));
+    return clone;
+  }
+
+  /// Minimum allowed value.
+  DoubleNode<T> min(int min, {String? error}) {
+    _validators.add(NumValidator.min(min, error: error));
+
+    return this;
+  }
+
+  /// Maximum allowed value.
+  DoubleNode<T> max(int max, {String? error}) {
+    _validators.add(NumValidator.max(max, error: error));
+
+    return this;
+  }
+
+  /// Requires a positive number (> 0).
+  DoubleNode<T> positive({String? error}) {
+    _validators.add(NumValidator.positive(error: error));
+
+    return this;
+  }
+
+  /// Requires a negative number (< 0).
+  DoubleNode<T> negative({String? error}) {
+    _validators.add(NumValidator.negative(error: error));
+
+    return this;
+  }
+
+  /// Requires number to be in a specific range (inclusive).
+  DoubleNode<T> range(int min, int max, {String? error}) {
+    _validators.add(NumValidator.range(min, max, error: error));
+
+    return this;
+  }
+
+  DoubleNode<T> decimal({String? error}) {
+    _validators.add(DoubleValidator.decimal(error: error));
+
+    return this;
+  }
+
+  DoubleNode<T> finite({String? error}) {
+    _validators.add(DoubleValidator.finite(error: error));
+
+    return this;
+  }
+
+  DoubleNode<T> integer({String? error}) {
+    _validators.add(DoubleValidator.integer(error: error));
+
+    return this;
+  }
+
+  @override
+  DoubleNode<T> withContext(ValidationContext context) {
     return clone(context: context);
   }
 }

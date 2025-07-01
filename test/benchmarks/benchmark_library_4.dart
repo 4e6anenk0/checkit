@@ -4,16 +4,24 @@ import 'package:checkit/src/checkit.dart';
 import 'package:validart/validart.dart';
 
 final testInputs = List<String>.generate(10000, (i) {
-  if (i % 4 == 0) return '192.168.1.1';
+  if (i % 4 == 0) return 'avhsd456#124!';
   if (i % 4 == 1) return '   ';
-  if (i % 4 == 2) return '2001:db8::ff00:42:8329';
-  return '999.999.999.999';
+  if (i % 4 == 2) return '1234';
+  return '3243 32434';
 });
 
 class CheckitBenchmark extends BenchmarkBase {
   CheckitBenchmark() : super('Checkit');
 
-  final validator = Checkit.string.ip().build();
+  final validator =
+      Checkit.string
+          .password()
+          .hasDigit()
+          .hasLowercase()
+          .hasUppercase()
+          .hasSpecial()
+          .noSpace()
+          .build();
 
   @override
   void run() {
@@ -25,14 +33,19 @@ class CheckitBenchmark extends BenchmarkBase {
 
 class CheckitBenchmarkWithOptimization extends BenchmarkBase {
   CheckitBenchmarkWithOptimization()
-    : super('Checkit with optimization (PermanentCache)');
+    : super('Checkit with optimization (stop on first error)');
 
   final validator =
       Checkit.string
-          .ip()
           .withContext(
-            Checkit.config.copyWith(usePermanentCache: true).buildContext(),
+            Checkit.config.copyWith(stopOnFirstError: true).buildContext(),
           )
+          .password()
+          .hasDigit()
+          .hasLowercase()
+          .hasUppercase()
+          .hasSpecial()
+          .noSpace()
           .build();
 
   @override
@@ -46,7 +59,7 @@ class CheckitBenchmarkWithOptimization extends BenchmarkBase {
 class ValidartBenchmark extends BenchmarkBase {
   ValidartBenchmark() : super('Validart');
 
-  final validator = Validart().string().ip();
+  final validator = Validart().string().password();
 
   @override
   void run() {

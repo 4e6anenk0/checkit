@@ -36,6 +36,8 @@ class ValidationContext {
       stringDateErrors: StringDateCheckitErrors(),
       passwordErrors: PasswordCheckitErrors(),
       ipErrors: IpCheckitErrors(),
+      intErrors: IntCheckitErrors(),
+      doubleErrors: DoubleCheckitErrors(),
     ),
     warnings: Warnings(),
     resources: ValidationResources(),

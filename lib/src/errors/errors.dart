@@ -5,3 +5,5 @@ export 'errors_base.dart';
 export 'string_date_errors.dart';
 export 'password_errors.dart';
 export 'ip_errors.dart';
+export 'int_errors.dart';
+export 'double_errors.dart';

@@ -5,4 +5,7 @@ export 'general_validator.dart';
 export 'subnet_validator.dart';
 export 'ip_validator.dart';
 export 'password_validator.dart';
+export 'int_validator.dart';
+export 'double_validator.dart';
+export 'datetime_validator.dart';
 export 'validator.dart';

@@ -273,6 +273,28 @@ abstract class StringDateValidator {
     );
   };
 
+  static Validator<String> weekend({String? error}) => (value, context) {
+    final DateTimeResource? datetimeResource = context.resources.tryGet(
+      'datetimeResource',
+    );
+    if (datetimeResource == null) {
+      return (false, context.warnings.dateTimeResourceNotFound());
+    }
+    if (datetimeResource.isWeekend()) return (true, null);
+    return (false, error ?? context.errors.stringDateErrors.weekend());
+  };
+
+  static Validator<String> weekday({String? error}) => (value, context) {
+    final DateTimeResource? datetimeResource = context.resources.tryGet(
+      'datetimeResource',
+    );
+    if (datetimeResource == null) {
+      return (false, context.warnings.dateTimeResourceNotFound());
+    }
+    if (datetimeResource.isWeekday()) return (true, null);
+    return (false, error ?? context.errors.stringDateErrors.weekday());
+  };
+
   static Validator<String> iso8601({String? error}) => (value, context) {
     final StringDateResource? stringDate = context.resources.tryGet(
       'stringDateResource',

@@ -186,7 +186,7 @@ class DateTimeResource extends DateResource {
     return _date.isAfter(date);
   }
 
-  isWorkDay() {
+  isWeekday() {
     return (_date.weekday >= DateTime.monday &&
         _date.weekday <= DateTime.friday);
   }
