@@ -112,15 +112,13 @@ void main() {
 }
 ```
 
-### 💡 Output
+### Output
 
 ```
 ❌ Invalid
   1. Value must not be A
   2. Value must not be F
 ```
-
-### 🧠 Behind the Scenes
 
 Any standard validator can be inverted via:
 
