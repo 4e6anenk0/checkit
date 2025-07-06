@@ -29,33 +29,35 @@ class StringCheckitErrors extends StringCheckitErrorsBase {
   range(int min, int max) =>
       'The length of string must be between $min and $max';
   @override
-  alpha() => "The string must contain only alphabetic characters";
+  alpha() => 'The string must contain only alphabetic characters';
   @override
-  alphanumeric() => "The string must contain only alphanumeric characters";
+  alphanumeric() => 'The string must contain only alphanumeric characters';
   @override
-  contains(String data) => "The string must contain $data";
+  contains(String data) => 'The string must contain "$data"';
 
   @override
-  exact(int length) => "";
+  exact(int length) => 'The string must be exactly $length characters long.';
 
   @override
-  equals(String expectedString) => "";
+  equals(String expectedString) =>
+      'The string must exactly match "$expectedString".';
 
   @override
-  isDouble() => "The string must be parsed as double";
+  isDouble() => 'The string must be parsed as double';
 
   @override
-  isInt() => "The string must be parsed as int";
+  isInt() => 'The string must be parsed as int';
 
   @override
-  hasSymbols(String symbols) => "";
+  hasSymbols(String symbols) =>
+      'String must contain multiple required symbols from the set: "$symbols"';
 
   @override
-  endsWith(String suffix) => "";
+  endsWith(String suffix) => 'The string must end with "$suffix".';
 
   @override
-  startsWith(String suffix) => "";
+  startsWith(String suffix) => 'The string must start with "$suffix".';
 
   @override
-  jwt() => "";
+  jwt() => 'The string is not a valid JSON Web Token (JWT).';
 }

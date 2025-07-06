@@ -413,14 +413,14 @@ class PasswordNode<T extends String> extends ValidatorNode<T, PasswordNode<T>> {
     return clone;
   }
 
-  /// Minimum number of characters.
+  /// Maximum number of characters.
   PasswordNode<T> max(int length, {String? error}) {
     _validators.add(StringValidator.max(length, error: error));
 
     return this;
   }
 
-  /// Maximum number of characters.
+  /// Minimum number of characters.
   PasswordNode<T> min(int length, {String? error}) {
     _validators.add(StringValidator.min(length, error: error));
 
@@ -476,6 +476,19 @@ class PasswordNode<T extends String> extends ValidatorNode<T, PasswordNode<T>> {
   /// Requires at least one character from a custom [symbols] set.
   PasswordNode<T> hasSymbols(String symbols, {String? error}) {
     _validators.add(StringValidator.hasSymbols(symbols, error: error));
+
+    return this;
+  }
+
+  PasswordNode<T> common({String? error}) {
+    _validators.addAll([
+      PasswordValidator.noSpace(),
+      StringValidator.min(8),
+      PasswordValidator.hasLowercase(),
+      PasswordValidator.hasUppercase(),
+      PasswordValidator.hasDigit(),
+      PasswordValidator.hasSpecial(),
+    ]);
 
     return this;
   }

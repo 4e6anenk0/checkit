@@ -7,5 +7,5 @@ class GeneralCheckitErrors<T> extends GeneralCheckitErrorsBase<T> {
   const GeneralCheckitErrors();
 
   @override
-  notNull() => "Value must be not null";
+  notNull() => 'Value must be not null';
 }

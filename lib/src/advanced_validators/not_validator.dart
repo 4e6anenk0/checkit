@@ -26,39 +26,4 @@ class NotValidator<T> extends AdvancedValidator<T> {
 
     return ValidationResult.success();
   }
-
-  /* @override
-  ValidationResult validate(T? value, {bool stopOnFirstError = false}) {
-    if (value == null) {
-      return ValidationResult.failure(['Value must not be null.']);
-    }
-
-    List<String>? collectedErrors;
-
-    for (final validator in validators) {
-      final (valid, error) = validator(value, context);
-
-      // If any validator passes, NotValidator fails
-      if (valid) {
-        return ValidationResult.failure([
-          error ?? 'A validator passed, which is not allowed.',
-        ]);
-      }
-
-      // Collect error if validator fails (for informational purposes, if needed)
-      if (error != null && !stopOnFirstError) {
-        collectedErrors ??= [];
-        collectedErrors.add(error);
-      }
-
-      // If stopOnFirstError is true, stop after the first passing validator
-      if (stopOnFirstError && valid) {
-        return ValidationResult.failure([
-          error ?? 'A validator passed, which is not allowed.',
-        ]);
-      }
-    }
-
-    return ValidationResult.success();
-  } */
 }

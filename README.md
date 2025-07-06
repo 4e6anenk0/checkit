@@ -174,6 +174,7 @@ Checkit.string
 
 Available Password Validations:
 
+* common
 * min, max, exact, range
 * hasUppercase, hasLowercase, hasDigit, hasLetter, noSpace, hasSpecial, hasSymbols
 
@@ -195,6 +196,7 @@ Checkit.string
 #### If the format is unknown
 
 Be careful, as it can determine the month and day values ​​itself through the method for cases when the date does not give an unambiguous correspondence.
+
 ```dart
 
 Checkit.string
@@ -238,7 +240,6 @@ Special methods:
 
 ```dart
 Checkit.string.ip().v4().validateOnce("192.168.0.1");
-
 ```
 
 Available IP Validations:
@@ -263,8 +264,6 @@ Available Subnet Validations:
 Special methods:
 
 * custom, not, clone, withContext, build
-
-
 
 ## 🔁 Inverting Validators with `.not()`
 
@@ -291,7 +290,7 @@ void main() {
 
 ### Output
 
-```
+```sh
 ❌ Invalid
   1. Value must not be A
   2. Value must not be F

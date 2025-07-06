@@ -13,23 +13,25 @@ class PasswordCheckitErrors extends PasswordCheckitErrorsBase {
   const PasswordCheckitErrors();
 
   @override
-  hasDigit() => "";
+  hasDigit() => 'Password must contain at least one digit (0-9).';
 
   @override
-  hasLetter() => "";
+  hasLetter() => 'Password must contain at least one letter.';
 
   @override
-  hasLowercase() => "";
+  hasLowercase() => 'Password must contain at least one lowercase letter.';
 
   @override
-  hasUppercase() => "";
+  hasUppercase() => 'Password must contain at least one uppercase letter.';
 
   @override
-  noSpace() => "";
+  noSpace() => 'Password cannot contain spaces.';
 
   @override
-  hasSpecial(String allowedChars) => "$allowedChars";
+  hasSpecial(String allowedChars) =>
+      'Password must contain at least one special character from the allowed set: $allowedChars';
 
   @override
-  hasSymbols(String symbols) => "";
+  hasSymbols(String symbols) =>
+      'Password must contain multiple required symbols from the set: $symbols';
 }
