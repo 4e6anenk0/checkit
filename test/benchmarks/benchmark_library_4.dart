@@ -21,7 +21,21 @@ class CheckitBenchmark extends BenchmarkBase {
           .hasUppercase()
           .hasSpecial()
           .noSpace()
+          .min(8)
           .build();
+
+  @override
+  void run() {
+    for (final input in testInputs) {
+      validator.validate(input);
+    }
+  }
+}
+
+class CheckitGeneralBenchmark extends BenchmarkBase {
+  CheckitGeneralBenchmark() : super('Checkit General');
+
+  final validator = Checkit.string.password().typical().build();
 
   @override
   void run() {
@@ -46,6 +60,7 @@ class CheckitBenchmarkWithOptimization extends BenchmarkBase {
           .hasUppercase()
           .hasSpecial()
           .noSpace()
+          .min(8)
           .build();
 
   @override
@@ -73,6 +88,7 @@ void main() {
   print('Running benchmark...\n');
 
   ValidartBenchmark().report();
+  CheckitGeneralBenchmark().report();
   CheckitBenchmark().report();
   CheckitBenchmarkWithOptimization().report();
 }

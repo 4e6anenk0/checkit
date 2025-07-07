@@ -33,29 +33,29 @@ void main() {
   String goodPassword = 'MySuperSafeP@ssw0rd!';
   var passwordResultGood = strongPasswordValidator.validateOnce(goodPassword);
   print('Пароль: "$goodPassword"');
-  passwordResultGood.prettyPrint(); // Ожидаем: Успех
+  passwordResultGood.prettyPrint(); // Expected: Success
 
   String weakPassword_ContainsCommon =
-      'MyP@ssw0rd!password'; // Содержит 'password'
+      'MyP@ssw0rd!password'; // Contains 'password'
   var passwordResultWeak1 = strongPasswordValidator.validateOnce(
     weakPassword_ContainsCommon,
   );
   print('Пароль: "$weakPassword_ContainsCommon"');
-  passwordResultWeak1.prettyPrint(); // Ожидаем: Ошибка (содержит 'password')
+  passwordResultWeak1.prettyPrint(); // Expected: Error (contains 'password')
 
   String weakPassword_IsUsername =
-      'username123'; // Идентичен имени пользователя (в этом примере)
+      'username123'; // Identical to username (in this example)
   var passwordResultWeak2 = strongPasswordValidator.validateOnce(
     weakPassword_IsUsername,
   );
   print('Пароль: "$weakPassword_IsUsername"');
   passwordResultWeak2
-      .prettyPrint(); // Ожидаем: Ошибка (идентичен 'username123')
+      .prettyPrint(); // Expected: Error (identical to 'username123')
 
   String weakPassword_TooShort = 'ShortP@1!'; // Слишком короткий
   var passwordResultWeak3 = strongPasswordValidator.validateOnce(
     weakPassword_TooShort,
   );
   print('Пароль: "$weakPassword_TooShort"');
-  passwordResultWeak3.prettyPrint(); // Ожидаем: Ошибка (слишком короткий)
+  passwordResultWeak3.prettyPrint(); // Expect: Error (too short)
 }

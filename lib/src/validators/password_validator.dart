@@ -1,6 +1,27 @@
 import 'validator.dart';
 
 abstract class PasswordValidator {
+  static Validator<String> typical({String? error}) => (value, context) {
+    if (context.resources.typicalPasswordPattern.hasMatch(value)) {
+      return (true, null);
+    }
+    return (false, error ?? context.errors.passwordErrors.typical());
+  };
+
+  static Validator<String> strong({String? error}) => (value, context) {
+    if (context.resources.strongPasswordPattern.hasMatch(value)) {
+      return (true, null);
+    }
+    return (false, error ?? context.errors.passwordErrors.strong());
+  };
+
+  static Validator<String> simple({String? error}) => (value, context) {
+    if (context.resources.simplePasswordPattern.hasMatch(value)) {
+      return (true, null);
+    }
+    return (false, error ?? context.errors.passwordErrors.simple());
+  };
+
   static Validator<String> hasUppercase({String? error}) => (value, context) {
     if (context.resources.uppercaseLetterPattern.hasMatch(value)) {
       return (true, null);
@@ -67,5 +88,12 @@ abstract class PasswordValidator {
       error ??
           context.errors.passwordErrors.hasSpecial(allowedChars ?? '[\\W]'),
     );
+  };
+
+  static Validator<String> noRepeats({String? error}) => (value, context) {
+    if (!context.resources.repeatPattern.hasMatch(value)) {
+      return (true, null);
+    }
+    return (false, error ?? context.errors.passwordErrors.noRepeats());
   };
 }

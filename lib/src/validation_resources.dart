@@ -11,6 +11,10 @@ abstract class ValidationResourcesBase {
   RegExp get spacePattern;
   RegExp get specialCharsPattern;
   RegExp get jwtPattern;
+  RegExp get typicalPasswordPattern;
+  RegExp get strongPasswordPattern;
+  RegExp get simplePasswordPattern;
+  RegExp get repeatPattern;
   final HashMap<String, dynamic> _permanent = HashMap();
   final HashMap<String, dynamic> _temporary = HashMap();
 
@@ -68,6 +72,10 @@ class ValidationResources extends ValidationResourcesBase {
   RegExp? _spacePattern;
   RegExp? _specialCharsPattern;
   RegExp? _jwtPattern;
+  RegExp? _typicalPasswordPattern;
+  RegExp? _strongPasswordPattern;
+  RegExp? _simplePasswordPattern;
+  RegExp? _repeatPattern;
 
   @override
   RegExp get emailPattern {
@@ -121,5 +129,29 @@ class ValidationResources extends ValidationResourcesBase {
     return _jwtPattern ??= RegExp(
       r'^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$',
     );
+  }
+
+  @override
+  RegExp get strongPasswordPattern {
+    return _strongPasswordPattern ??= RegExp(
+      r'^(?!.*(.)\1)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$',
+    );
+  }
+
+  @override
+  RegExp get typicalPasswordPattern {
+    return _typicalPasswordPattern ??= RegExp(
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$',
+    );
+  }
+
+  @override
+  RegExp get simplePasswordPattern {
+    return _simplePasswordPattern ??= RegExp(r'^[a-zA-Z0-9]{4,}$');
+  }
+
+  @override
+  RegExp get repeatPattern {
+    return _repeatPattern ??= RegExp(r'(.)\1');
   }
 }

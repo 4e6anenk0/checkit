@@ -84,14 +84,14 @@ Available String Validations:
 * min, max, exact, range
 * email
 * alpha, alphanumeric
-* contains, hasSymbols
-* isDouble, isInt,
+* contains, hasSymbols, hasRepeats
+* isDouble, isInt
 * jwt, pattern
 * equals, endsWith, startsWith
 
 Special methods:
 
-* custom, not, clone, withContext, build
+* custom, not, clone, withContext, build, validateOnce, any, every
 
 And refs to other nodes:
 
@@ -116,7 +116,7 @@ Available Num Validations:
 
 Special methods:
 
-* custom, not, clone, withContext, build
+* custom, not, clone, withContext, build, validateOnce, any, every
 
 ### Integer Validator
 
@@ -139,7 +139,7 @@ Available Num Validations:
 
 Special methods:
 
-* custom, not, clone, withContext, build
+* custom, not, clone, withContext, build, validateOnce, any, every
 
 ### Double Validator
 
@@ -158,7 +158,7 @@ Available Double Validations:
 
 Special methods:
 
-* custom, not, clone, withContext, build
+* custom, not, clone, withContext, build, validateOnce, any, every
 
 ### Password Validator
 
@@ -174,13 +174,14 @@ Checkit.string
 
 Available Password Validations:
 
-* common
-* min, max, exact, range
-* hasUppercase, hasLowercase, hasDigit, hasLetter, noSpace, hasSpecial, hasSymbols
+* typical, simple, strong
+* min, max, exact
+* hasUppercase, hasLowercase, hasDigit, hasLetter,  hasSpecial, hasSymbols
+* noSpace, noRepeats
 
 Special methods:
 
-* custom, not, clone, withContext, build
+* custom, not, clone, withContext, build, validateOnce, any, every
 
 ### Date Validator (from String)
 
@@ -216,7 +217,7 @@ Available Date (String) Validations:
 
 Special methods:
 
-* custom, not, clone, withContext, build
+* custom, not, clone, withContext, build, validateOnce, any, every
 
 ### DateTime Validator
 
@@ -234,7 +235,7 @@ Available DateTime Validations:
 
 Special methods:
 
-* custom, not, clone, withContext, build
+* custom, not, clone, withContext, build, validateOnce, any, every
 
 ### IP & Subnets
 
@@ -251,7 +252,7 @@ Available IP Validations:
 
 Special methods:
 
-* custom, not, clone, withContext, build
+* custom, not, clone, withContext, build, validateOnce, any, every
 
 ```dart
 Checkit.string.subnet("192.168.0.0/24").contains("192.168.0.42");
@@ -263,7 +264,7 @@ Available Subnet Validations:
 
 Special methods:
 
-* custom, not, clone, withContext, build
+* custom, not, clone, withContext, build, validateOnce, any, every
 
 ## 🔁 Inverting Validators with `.not()`
 

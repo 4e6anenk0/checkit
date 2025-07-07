@@ -141,4 +141,11 @@ abstract class StringValidator {
     if (isStartWith) return (true, null);
     return (false, error ?? context.errors.stringErrors.startsWith(suffix));
   };
+
+  static Validator<String> hasRepeats({String? error}) => (value, context) {
+    if (context.resources.repeatPattern.hasMatch(value)) {
+      return (true, null);
+    }
+    return (false, error ?? context.errors.stringErrors.hasRepeats());
+  };
 }

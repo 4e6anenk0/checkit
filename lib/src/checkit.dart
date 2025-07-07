@@ -125,30 +125,6 @@ abstract class ValidatorNode<T, Self extends ValidatorNode<T, Self>> {
     return this as Self;
   }
 
-  /* Self any(List<Validator<T>> validators, {ValidationContext? context}) {
-    final relContext =
-        context != null
-            ? context.copyWith(stopOnFirstError: false)
-            : _context.copyWith(stopOnFirstError: false);
-    _validators.add(
-      GeneralValidator.wrapAdvanced(OrValidator<T>(validators, relContext)),
-    );
-
-    return this as Self;
-  }
-
-  Self every(List<Validator<T>> validators, {ValidationContext? context}) {
-    final relContext =
-        context != null
-            ? context.copyWith(stopOnFirstError: false)
-            : _context.copyWith(stopOnFirstError: false);
-    _validators.add(
-      GeneralValidator.wrapAdvanced(AndValidator<T>(validators, relContext)),
-    );
-
-    return this as Self;
-  } */
-
   Self any(List<Validator<T>> validators, {String? error}) {
     _validators.add(GeneralValidator.any(validators, error: error));
 
@@ -516,15 +492,32 @@ class PasswordNode<T extends String> extends ValidatorNode<T, PasswordNode<T>> {
     return this;
   }
 
-  PasswordNode<T> common({String? error}) {
-    _validators.addAll([
-      PasswordValidator.noSpace(),
-      StringValidator.min(8),
-      PasswordValidator.hasLowercase(),
-      PasswordValidator.hasUppercase(),
-      PasswordValidator.hasDigit(),
-      PasswordValidator.hasSpecial(),
-    ]);
+  PasswordNode<T> typical({String? error}) {
+    _validators.add(PasswordValidator.typical());
+
+    return this;
+  }
+
+  PasswordNode<T> strong({String? error}) {
+    _validators.add(PasswordValidator.strong());
+
+    return this;
+  }
+
+  PasswordNode<T> noRepeats({String? error}) {
+    _validators.add(PasswordValidator.noRepeats());
+
+    return this;
+  }
+
+  PasswordNode<T> simple({String? error}) {
+    _validators.add(PasswordValidator.simple());
+
+    return this;
+  }
+
+  PasswordNode<T> exact(int length, {String? error}) {
+    _validators.add(StringValidator.exact(length, error: error));
 
     return this;
   }
@@ -637,6 +630,61 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
     return this;
   }
 
+  StringNode<T> exact(int length, {String? error}) {
+    _validators.add(StringValidator.exact(length, error: error));
+
+    return this;
+  }
+
+  /// Validates that the string has no more than [length] characters.
+  StringNode<T> contains(String data, {String? error}) {
+    _validators.add(StringValidator.contains(data, error: error));
+
+    return this;
+  }
+
+  StringNode<T> alphanumeric({String? error}) {
+    _validators.add(StringValidator.alphanumeric(error: error));
+
+    return this;
+  }
+
+  StringNode<T> alpha({String? error}) {
+    _validators.add(StringValidator.alpha(error: error));
+
+    return this;
+  }
+
+  StringNode<T> isDouble({String? error}) {
+    _validators.add(StringValidator.isDouble(error: error));
+
+    return this;
+  }
+
+  StringNode<T> isInt({String? error}) {
+    _validators.add(StringValidator.isInt(error: error));
+
+    return this;
+  }
+
+  StringNode<T> jwt({String? error}) {
+    _validators.add(StringValidator.jwt(error: error));
+
+    return this;
+  }
+
+  StringNode<T> pattern(String pattern, {String? error}) {
+    _validators.add(StringValidator.pattern(pattern, error: error));
+
+    return this;
+  }
+
+  StringNode<T> equals(String expectedString, {String? error}) {
+    _validators.add(StringValidator.equals(expectedString, error: error));
+
+    return this;
+  }
+
   /// Validates that the string contains at least one of the provided [symbols].
   StringNode<T> hasSymbols(String symbols, {String? error}) {
     _validators.add(StringValidator.hasSymbols(symbols, error: error));
@@ -654,6 +702,12 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
   /// Validates that the string starts with the provided [prefix].
   StringNode<T> startsWith(String suffix, {String? error}) {
     _validators.add(StringValidator.startsWith(suffix, error: error));
+
+    return this;
+  }
+
+  StringNode<T> hasRepeats({String? error}) {
+    _validators.add(StringValidator.hasRepeats(error: error));
 
     return this;
   }

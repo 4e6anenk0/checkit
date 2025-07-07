@@ -15,6 +15,7 @@ abstract class StringCheckitErrorsBase {
   endsWith(String suffix);
   startsWith(String suffix);
   jwt();
+  hasRepeats();
 }
 
 class StringCheckitErrors extends StringCheckitErrorsBase {
@@ -60,4 +61,8 @@ class StringCheckitErrors extends StringCheckitErrorsBase {
 
   @override
   jwt() => 'The string is not a valid JSON Web Token (JWT).';
+
+  @override
+  hasRepeats() =>
+      'Value must contain at least one repeated character in a row (e.g., "bb", "!!", or "22").';
 }
