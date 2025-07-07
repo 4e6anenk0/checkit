@@ -125,6 +125,42 @@ abstract class ValidatorNode<T, Self extends ValidatorNode<T, Self>> {
     return this as Self;
   }
 
+  /* Self any(List<Validator<T>> validators, {ValidationContext? context}) {
+    final relContext =
+        context != null
+            ? context.copyWith(stopOnFirstError: false)
+            : _context.copyWith(stopOnFirstError: false);
+    _validators.add(
+      GeneralValidator.wrapAdvanced(OrValidator<T>(validators, relContext)),
+    );
+
+    return this as Self;
+  }
+
+  Self every(List<Validator<T>> validators, {ValidationContext? context}) {
+    final relContext =
+        context != null
+            ? context.copyWith(stopOnFirstError: false)
+            : _context.copyWith(stopOnFirstError: false);
+    _validators.add(
+      GeneralValidator.wrapAdvanced(AndValidator<T>(validators, relContext)),
+    );
+
+    return this as Self;
+  } */
+
+  Self any(List<Validator<T>> validators, {String? error}) {
+    _validators.add(GeneralValidator.any(validators, error: error));
+
+    return this as Self;
+  }
+
+  Self every(List<Validator<T>> validators, {String? error}) {
+    _validators.add(GeneralValidator.every(validators, error: error));
+
+    return this as Self;
+  }
+
   /// Adds a custom validator using a function.
   ///
   /// ### Example:
