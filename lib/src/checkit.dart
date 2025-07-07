@@ -27,10 +27,21 @@ abstract class Checkit {
   static DateTimeNode get dateTime => DateTimeNode(config.buildContext());
 }
 
-/// Global configuration for validation behavior.
+/// Holds configuration settings for validation behavior.
 ///
-/// Controls how validators behave, what errors to show,
-/// whether to stop on first error, and caching strategy.
+/// This class allows you to configure how validation should behave globally.
+/// You can pass an instance of `ValidatorConfig` to control localization,
+/// caching, error styles, and rule processing strategy.
+///
+/// Example:
+/// ```dart
+/// Checkit.config = ValidatorConfig(
+///   stopOnFirstError: true,
+///   usePermanentCache: true,
+///   caseHandling: CaseHandling.lowercase,
+///   errors: CustomCheckitErrors(),
+/// );
+/// ```
 class ValidatorConfig {
   ValidatorConfig({
     this.stopOnFirstError = false,
@@ -48,13 +59,56 @@ class ValidatorConfig {
     this.caseHandling = CaseHandling.exact,
     this.usePermanentCache = false,
   });
+
+  /// The error message providers used by validators.
+  ///
+  /// You can use the default English messages (`CheckitErrors`) or provide
+  /// your own implementation to support i18n or customization.
+  ///
+  /// Default: English error messages.
   final ICheckitErrors errors;
+
+  /// The warning providers used for supplementary messages or notices.
+  ///
+  /// Default: Empty `Warnings` object.
   final Warnings warnings;
+
+  /// Additional resources that can be used during validation.
+  ///
+  /// Typically includes formatters, date/time parsing tools, etc.
   final ValidationResourcesBase resources = ValidationResources();
+
+  /// Whether validation should stop at the first error encountered.
+  ///
+  /// Default: `false` — all validators will be executed.
   final bool stopOnFirstError;
+
+  /// If true, validators will reuse resources between validations.
+  ///
+  /// Use this to optimize performance for repeated validations.
+  ///
+  /// Default: `false`.
   final bool usePermanentCache;
+
+  /// Controls case sensitivity behavior during string validation.
+  ///
+  /// - `CaseHandling.exact` — validation is case-sensitive (e.g. "Hello" ≠ "hello").
+  /// - `CaseHandling.ignore` — validation ignores casing (e.g. "Hello" == "hello").
+  ///
+  /// Default: `CaseHandling.exact`.
   final CaseHandling caseHandling;
 
+  /// Creates a modified copy of this config with optional changes.
+  ///
+  /// Use this when you want to slightly tweak an existing config.
+  ///
+  /// Example:
+  /// ```dart
+  /// final customConfig = defaultConfig.copyWith(
+  ///   stopOnFirstError: true,
+  ///   caseHandling: CaseHandling.lowercase,
+  /// );
+  /// ```
   ValidatorConfig copyWith({
     ValidationContext? context,
     bool? stopOnFirstError,
@@ -254,69 +308,208 @@ class StringDateNode<T extends String>
   }
 
   /// Requires a specific date format.
+  ///
+  /// Checks whether a date conforms to a possible format.
+  /// Note that the date '2012-12-12' can correspond to two formats: 'yyyy-MM-dd' and 'yyyy-dd-MM'.
+  /// However, the validator does not select a preferred format and only checks the possibility of matching a format.
+  /// If the format can be uniquely determined, the validator will return an error:
+  /// for example, '2012-31-12' for 'yyyy-MM-dd'. Or succeed: for example, '2012-31-12' for 'yyyy-dd-MM'
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final value1 = '2012-12-12';
+  /// final value2 = '2012/12/12';
+  /// final value3 = '2012-31-12';
+  ///
+  /// final validator = Checkit.string
+  ///   .dateTimeAuto()
+  ///   .format('yyyy-MM-dd')
+  ///   .build();
+  ///
+  /// print(validator.validate(value1).isValid); // true
+  /// print(validator.validate(value2).isValid); // false
+  /// print(validator.validate(value3).isValid); // false
+  /// ```
   StringDateNode format(String format, {String? error}) {
     _validators.add(StringDateValidator.format(format, error: error));
 
     return this;
   }
 
-  /// Maximum allowed year.
+  /// Specifies the maximum allowed year for the date.
+  ///
+  /// If the year of the date is greater than the specified `max`, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.dateTime('yyyy-MM-dd').maxYear(2025).build();
+  ///
+  /// print(validator.validate('2024-12-31').isValid); // true
+  /// print(validator.validate('2026-01-01').isValid); // false
+  /// ```
   StringDateNode maxYear(int max, {String? error}) {
     _validators.add(StringDateValidator.maxYear(max, error: error));
 
     return this;
   }
 
-  /// Minimum allowed year.
+  /// Specifies the minimum allowed year for the date.
+  ///
+  /// If the year of the date is less than the specified `min`, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.dateTime('yyyy-MM-dd').minYear(2020).build();
+  ///
+  /// print(validator.validate('2021-01-01').isValid); // true
+  /// print(validator.validate('2019-12-31').isValid); // false
+  /// ```
   StringDateNode minYear(int min, {String? error}) {
     _validators.add(StringDateValidator.minYear(min, error: error));
 
     return this;
   }
 
-  /// Date must not be in the past.
+  /// Requires the date to not be in the past (relative to now).
+  ///
+  /// If the date is earlier than the current date, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.dateTime('yyyy-MM-dd').notPast().build();
+  ///
+  /// print(validator.validate('2999-01-01').isValid); // true
+  /// print(validator.validate('2000-01-01').isValid); // false
+  /// ```
   StringDateNode notPast({String? error}) {
     _validators.add(StringDateValidator.notPast(error: error));
 
     return this;
   }
 
-  /// Date must not be in the future.
+  /// Requires the date to not be in the future (relative to now).
+  ///
+  /// If the date is later than the current date, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.dateTime('yyyy-MM-dd').notFuture().build();
+  ///
+  /// print(validator.validate('1990-01-01').isValid); // true
+  /// print(validator.validate('2999-01-01').isValid); // false
+  /// ```
   StringDateNode notFuture({String? error}) {
     _validators.add(StringDateValidator.notFuture(error: error));
 
     return this;
   }
 
-  /// Date must be before a certain string date.
+  /// Requires the date to be before a specific date.
+  ///
+  /// If the input date is greater than or equal to the `date`, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.dateTime('yyyy-MM-dd').before('2025-01-01').build();
+  ///
+  /// print(validator.validate('2024-12-31').isValid); // true
+  /// print(validator.validate('2025-01-01').isValid); // false
+  /// ```
   StringDateNode before(String date, {String? error}) {
     _validators.add(StringDateValidator.before(date, error: error));
 
     return this;
   }
 
-  /// Date must be after a certain string date.
+  /// Requires the date to be after a specific date.
+  ///
+  /// If the input date is less than or equal to the `date`, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.dateTime('yyyy-MM-dd').after('2020-01-01').build();
+  ///
+  /// print(validator.validate('2021-01-01').isValid); // true
+  /// print(validator.validate('2019-12-31').isValid); // false
+  /// ```
   StringDateNode after(String date, {String? error}) {
     _validators.add(StringDateValidator.after(date, error: error));
 
     return this;
   }
 
-  /// Date must be within the given range.
-  StringDateNode range(String start, String end, {String? error}) {
-    _validators.add(StringDateValidator.range(start, end, error: error));
+  /// Requires the date to be within the specified range.
+  ///
+  /// Validates that the input date is within the range defined by [start] and [end].
+  ///
+  /// - If [inclusive] is `false` (default), the date must be strictly **after** `start` and strictly **before** `end`.
+  /// - If [inclusive] is `true`, the date may be equal to `start` or `end`.
+  ///
+  /// Dates must match the format used earlier in the validator chain (e.g., `dateTime('yyyy-MM-dd')`).
+  ///
+  /// ### Example (non-inclusive):
+  /// ```dart
+  /// final validator = Checkit.string
+  ///   .dateTime('yyyy-MM-dd')
+  ///   .range('2020-01-01', '2022-12-31')
+  ///   .build();
+  ///
+  /// print(validator.validate('2021-06-01').isValid); // true
+  /// print(validator.validate('2020-01-01').isValid); // false
+  /// print(validator.validate('2022-12-31').isValid); // false
+  /// ```
+  ///
+  /// ### Example (inclusive):
+  /// ```dart
+  /// final validator = Checkit.string
+  ///   .dateTime('yyyy-MM-dd')
+  ///   .range('2020-01-01', '2022-12-31', inclusive: true)
+  ///   .build();
+  ///
+  /// print(validator.validate('2020-01-01').isValid); // true
+  /// print(validator.validate('2022-12-31').isValid); // true
+  /// ```
+  StringDateNode range(
+    String start,
+    String end, {
+    String? error,
+    bool inclusive = false,
+  }) {
+    _validators.add(
+      StringDateValidator.range(start, end, error: error, inclusive: inclusive),
+    );
 
     return this;
   }
 
-  /// Requires the date to be a leap year.
+  /// Requires the date to be in a leap year.
+  ///
+  /// If the year of the date is not a leap year (divisible by 4, but not 100 unless also 400), validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.dateTime('yyyy-MM-dd').leapYear().build();
+  ///
+  /// print(validator.validate('2020-02-29').isValid); // true
+  /// print(validator.validate('2021-02-28').isValid); // false
+  /// ```
   StringDateNode leapYear({String? error}) {
     _validators.add(StringDateValidator.leapYear(error: error));
 
     return this;
   }
 
-  /// Validates ISO 8601 format.
+  /// Requires the date to be in ISO 8601 format.
+  ///
+  /// This checks whether the input string conforms to the standard ISO format: `yyyy-MM-ddTHH:mm:ssZ`, or a simplified version.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.dateTimeIso().iso8601().build();
+  ///
+  /// print(validator.validate('2024-06-20T13:00:00Z').isValid); // true
+  /// print(validator.validate('20-06-2024').isValid); // false
+  /// ```
   StringDateNode iso8601({String? error}) {
     _validators.add(StringDateValidator.iso8601(error: error));
 
