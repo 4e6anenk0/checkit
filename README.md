@@ -1,5 +1,9 @@
 
-# 🛡️ Checkit
+# Checkit
+
+<p align="center">
+    <img width=200 height=200 src="https://github.com/4e6anenk0/checkit/blob/main/assets/logo-big.png?raw=true" alt="Logo">
+</p>
 
 **Checkit** is a modular, extensible validation library for Dart. It supports validation chains, localization, custom rules, and flexible configuration. Perfect for both client and server use cases.
 
