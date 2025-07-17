@@ -20,10 +20,13 @@ abstract class Checkit {
   /// Creates a NumNode validator.
   static NumNode get num => NumNode(config.buildContext());
 
+  /// Creates a IntNode validator.
   static IntNode get int => IntNode(config.buildContext());
 
+  /// Creates a DoubleNode validator.
   static DoubleNode get double => DoubleNode(config.buildContext());
 
+  /// Creates a DateTimeNode validator.
   static DateTimeNode get dateTime => DateTimeNode(config.buildContext());
 }
 
@@ -540,35 +543,103 @@ class NumNode<T extends num> extends ValidatorNode<T, NumNode<T>> {
     return clone;
   }
 
-  /// Minimum allowed value.
-  NumNode<T> min(int min, {String? error}) {
-    _validators.add(NumValidator.min(min, error: error));
+  /// Sets the **minimum allowed value** (default: inclusive).
+  ///
+  /// Validation fails if the input is less than [min].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.num.min(10).build();
+  ///
+  /// print(validator.validate(5).isValid);   // false
+  /// print(validator.validate(10).isValid);  // true
+  /// print(validator.validate(15).isValid);  // true
+  /// ```
+  NumNode<T> min(int min, {String? error, bool inclusive = true}) {
+    _validators.add(NumValidator.min(min, error: error, inclusive: inclusive));
 
     return this;
   }
 
-  /// Maximum allowed value.
-  NumNode<T> max(int max, {String? error}) {
-    _validators.add(NumValidator.max(max, error: error));
+  /// Sets the **maximum allowed value** (default: inclusive).
+  ///
+  /// Validation fails if the input is greater than [max].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.num.max(100).build();
+  ///
+  /// print(validator.validate(150).isValid);  // false
+  /// print(validator.validate(100).isValid);  // true
+  /// print(validator.validate(50).isValid);   // true
+  /// ```
+  NumNode<T> max(int max, {String? error, bool inclusive = true}) {
+    _validators.add(NumValidator.max(max, error: error, inclusive: inclusive));
 
     return this;
   }
 
-  /// Requires a positive number (> 0).
+  /// Requires the value to be **positive** (> 0).
+  ///
+  /// Zero is **not** considered valid.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.num.positive().build();
+  ///
+  /// print(validator.validate(5).isValid);   // true
+  /// print(validator.validate(0).isValid);   // false
+  /// print(validator.validate(-1).isValid);  // false
+  /// ```
   NumNode<T> positive({String? error}) {
     _validators.add(NumValidator.positive(error: error));
 
     return this;
   }
 
-  /// Requires a negative number (< 0).
+  /// Requires the value to be **negative** (< 0).
+  ///
+  /// Zero is **not** considered valid.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.num.negative().build();
+  ///
+  /// print(validator.validate(-10).isValid); // true
+  /// print(validator.validate(0).isValid);   // false
+  /// print(validator.validate(5).isValid);   // false
+  /// ```
   NumNode<T> negative({String? error}) {
     _validators.add(NumValidator.negative(error: error));
 
     return this;
   }
 
-  /// Requires number to be in a specific range (inclusive).
+  /// Validates that the number is within a **specific range**.
+  ///
+  /// The range is defined by [min] and [max]. You can control whether the boundaries
+  /// are inclusive using [includeMin] and [includeMax].
+  ///
+  /// ### Example (inclusive by default):
+  /// ```dart
+  /// final validator = Checkit.num.range(1, 10).build();
+  ///
+  /// print(validator.validate(1).isValid);   // true
+  /// print(validator.validate(10).isValid);  // true
+  /// print(validator.validate(0).isValid);   // false
+  /// print(validator.validate(11).isValid);  // false
+  /// ```
+  ///
+  /// ### Example (exclusive boundaries):
+  /// ```dart
+  /// final validator = Checkit.num
+  ///   .range(1, 10, includeMin: false, includeMax: false)
+  ///   .build();
+  ///
+  /// print(validator.validate(1).isValid);   // false
+  /// print(validator.validate(5).isValid);   // true
+  /// print(validator.validate(10).isValid);  // false
+  /// ```
   NumNode<T> range(
     num min,
     num max, {
@@ -595,18 +666,25 @@ class NumNode<T extends num> extends ValidatorNode<T, NumNode<T>> {
   }
 }
 
-/// A specialized validator node for validating password strings.
+/// A validator node for validating passwords (strings with specific strength rules).
 ///
-/// Includes rules like uppercase, digits, special characters, etc.
+/// Supports a fluent chainable API for validating password length, complexity,
+/// repetition, and character requirements.
 ///
 /// ### Example:
 /// ```dart
-/// final result = Checkit.string
+/// final validator = Checkit.string
 ///   .password()
 ///   .min(8)
 ///   .hasUppercase()
+///   .hasLowercase()
 ///   .hasDigit()
-///   .validateOnce('P@ssword1');
+///   .hasSpecial()
+///   .noRepeats()
+///   .build();
+///
+/// final result = validator.validate("Pa$$w0rd!");
+/// print(result.isValid); // true
 /// ```
 class PasswordNode<T extends String> extends ValidatorNode<T, PasswordNode<T>> {
   PasswordNode(super._config);
@@ -618,58 +696,98 @@ class PasswordNode<T extends String> extends ValidatorNode<T, PasswordNode<T>> {
     return clone;
   }
 
-  /// Maximum number of characters.
+  /// Requires the password to have a maximum number of characters.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().max(12);
+  /// ```
   PasswordNode<T> max(int length, {String? error}) {
     _validators.add(StringValidator.max(length, error: error));
 
     return this;
   }
 
-  /// Minimum number of characters.
+  /// Requires the password to have a minimum number of characters.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().min(8);
+  /// ```
   PasswordNode<T> min(int length, {String? error}) {
     _validators.add(StringValidator.min(length, error: error));
 
     return this;
   }
 
-  /// Requires at least one uppercase letter (A-Z).
+  /// Requires at least one uppercase letter (`A-Z`).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().hasUppercase();
+  /// ```
   PasswordNode<T> hasUppercase({String? error}) {
     _validators.add(PasswordValidator.hasUppercase(error: error));
 
     return this;
   }
 
-  /// Requires at least one lowercase letter (a-z).
+  /// Requires at least one lowercase letter (`a-z`).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().hasLowercase();
+  /// ```
   PasswordNode<T> hasLowercase({String? error}) {
     _validators.add(PasswordValidator.hasLowercase(error: error));
 
     return this;
   }
 
-  /// Requires at least one digit (0-9).
+  /// Requires at least one digit (`0-9`).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().hasDigit();
+  /// ```
   PasswordNode<T> hasDigit({String? error}) {
     _validators.add(PasswordValidator.hasDigit(error: error));
 
     return this;
   }
 
-  /// Requires at least one letter (A-Z or a-z).
+  /// Requires at least one letter (either lowercase or uppercase).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().hasLetter();
+  /// ```
   PasswordNode<T> hasLetter({String? error}) {
     _validators.add(PasswordValidator.hasLetter(error: error));
 
     return this;
   }
 
-  /// Disallows whitespace characters.
+  /// Disallows whitespace characters (` `, `\t`, etc.) in the password.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().noSpace();
+  /// ```
   PasswordNode<T> noSpace({String? error}) {
     _validators.add(PasswordValidator.noSpace(error: error));
 
     return this;
   }
 
-  /// Requires at least one special character.
+  /// Requires at least one special character such as `!@#\$%^&*`.
   ///
-  /// You can customize allowed characters with [allowedChars].
+  /// You can restrict which characters are allowed using [allowedChars].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().hasSpecial(allowedChars: '!@#');
+  /// ```
   PasswordNode<T> hasSpecial({String? allowedChars, String? error}) {
     _validators.add(
       PasswordValidator.hasSpecial(allowedChars: allowedChars, error: error),
@@ -678,37 +796,124 @@ class PasswordNode<T extends String> extends ValidatorNode<T, PasswordNode<T>> {
     return this;
   }
 
-  /// Requires at least one character from a custom [symbols] set.
+  /// Requires the password to contain at least one character from the given [symbols] string.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().hasSymbols('@\$%');
+  /// ```
   PasswordNode<T> hasSymbols(String symbols, {String? error}) {
     _validators.add(StringValidator.hasSymbols(symbols, error: error));
 
     return this;
   }
 
+  /// Validates a **typical secure password** structure.
+  ///
+  /// Requirements:
+  /// - At least 8 characters
+  /// - At least one lowercase letter
+  /// - At least one uppercase letter
+  /// - At least one digit
+  /// - At least one special character
+  ///
+  /// Will fail: `Password1` (no special char), `password!` (no uppercase), `PASS123!` (no lowercase)
+  /// Will pass: `P@ssword1`, `Test!234`
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.password().typical().build();
+  ///
+  /// print(validator.validate('P@ssword1').isValid);   // true
+  /// print(validator.validate('password!').isValid);   // false
+  /// print(validator.validate('PASSWORD1!').isValid);  // false
+  /// print(validator.validate('Passw1!').isValid);     // false (too short)
+  /// ```
   PasswordNode<T> typical({String? error}) {
     _validators.add(PasswordValidator.typical());
 
     return this;
   }
 
+  /// Validates a **strong password** with stricter requirements.
+  ///
+  /// Requirements:
+  /// - At least 10 characters
+  /// - At least one lowercase letter
+  /// - At least one uppercase letter
+  /// - At least one digit
+  /// - At least one special character
+  /// - No repeated characters in a row
+  ///
+  /// Will fail: `StrongPass1!` (contains "ss"), `Pass1234!!` (contains "!!"), `Weak12!` (too short)
+  /// Will pass: `Str0ng!Pasw`, `My_PasSw0rd!`, `Ab1@cDe#Fg`
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.password().strong().build();
+  ///
+  /// print(validator.validate('Str0ng!PasS').isValid);     // true
+  /// print(validator.validate('StrongPass1!').isValid);    // false (repeating "ss")
+  /// print(validator.validate('Weak12!').isValid);         // false (too short)
+  /// print(validator.validate('Ab1@cDe#Fg').isValid);      // true
+  /// ```
   PasswordNode<T> strong({String? error}) {
     _validators.add(PasswordValidator.strong());
 
     return this;
   }
 
+  /// Disallows **repeating characters** in a row.
+  ///
+  /// This validator fails if any character appears twice or more **consecutively**.
+  ///
+  /// Will fail: `aa`, `11`, `!!`, `pAsswwoooord`
+  /// Will pass: `a1b2c3`, `AbC!@#`, `abc123`
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.password().noRepeats().build();
+  ///
+  /// print(validator.validate('abc123').isValid);       // true
+  /// print(validator.validate('AAbbCC').isValid);       // false
+  /// print(validator.validate('hello!!').isValid);      // false
+  /// ```
   PasswordNode<T> noRepeats({String? error}) {
     _validators.add(PasswordValidator.noRepeats());
 
     return this;
   }
 
+  /// Validates that the password is **simple**.
+  ///
+  /// A simple password must:
+  /// - Be at least 4 characters long
+  /// - Contain only letters and/or digits (no special characters)
+  ///
+  /// Will fail: `abc`, `123`, `abc$`, `qwe!`
+  /// Will pass: `abcd`, `1234`, `abc1`
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.password().simple().build();
+  ///
+  /// print(validator.validate('1234').isValid);     // true
+  /// print(validator.validate('abcd').isValid);     // true
+  /// print(validator.validate('abc!').isValid);     // false
+  /// print(validator.validate('ab').isValid);       // false
+  /// ```
   PasswordNode<T> simple({String? error}) {
     _validators.add(PasswordValidator.simple());
 
     return this;
   }
 
+  /// Requires the password to have **exactly** [length] characters.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.password().exact(12);
+  /// ```
   PasswordNode<T> exact(int length, {String? error}) {
     _validators.add(StringValidator.exact(length, error: error));
 
@@ -802,14 +1007,54 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
     return this;
   }
 
-  /// Validates that the string's length is between [min] and [max].
-  StringNode<T> range(int min, int max, {String? error}) {
-    _validators.add(StringValidator.range(min, max, error: error));
+  /// Validates that the string is within a **specific range**.
+  ///
+  /// The range is defined by [min] and [max]. You can control whether the boundaries
+  /// are inclusive using [includeMin] and [includeMax].
+  ///
+  /// ### Example (inclusive by default):
+  /// ```dart
+  /// final validator = Checkit.string.range(7, 12).build();
+  ///
+  /// print(validator.validate('Hello World!').isValid);   // true
+  /// print(validator.validate('Hello!').isValid);  // false
+  /// ```
+  ///
+  /// ### Example (exclusive boundaries):
+  /// ```dart
+  /// final validator = Checkit.string
+  ///   .range(7, 12, includeMin: false, includeMax: false)
+  ///   .build();
+  ///
+  /// print(validator.validate('Hello World!').isValid);   // false
+  /// print(validator.validate('Hello!').isValid);   // false
+  /// ```
+  StringNode<T> range(
+    int min,
+    int max, {
+    String? error,
+    bool includeMin = true,
+    bool includeMax = true,
+  }) {
+    _validators.add(
+      StringValidator.range(
+        min,
+        max,
+        error: error,
+        includeMin: includeMin,
+        includeMax: includeMax,
+      ),
+    );
 
     return this;
   }
 
   /// Validates that the string has at least [length] characters.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.min(4).build().validate('abc'); // isValid: false
+  /// ```
   StringNode<T> min(int length, {String? error}) {
     _validators.add(StringValidator.min(length, error: error));
 
@@ -817,61 +1062,119 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
   }
 
   /// Validates that the string has no more than [length] characters.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.max(5).build().validate('abcdef'); // isValid: false
+  /// ```
   StringNode<T> max(int length, {String? error}) {
     _validators.add(StringValidator.max(length, error: error));
 
     return this;
   }
 
+  /// Validates that the string has exactly [length] characters.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.exact(4).build().validate('abcd'); // isValid: true
+  /// ```
   StringNode<T> exact(int length, {String? error}) {
     _validators.add(StringValidator.exact(length, error: error));
 
     return this;
   }
 
-  /// Validates that the string has no more than [length] characters.
+  /// Validates that the string contains the [data] substring.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.contains('test').build().validate('unit test'); // isValid: true
+  /// ```
   StringNode<T> contains(String data, {String? error}) {
     _validators.add(StringValidator.contains(data, error: error));
 
     return this;
   }
 
+  /// Validates that the string contains only letters and digits.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.alphanumeric().build().validate('abc123'); // isValid: true
+  /// ```
   StringNode<T> alphanumeric({String? error}) {
     _validators.add(StringValidator.alphanumeric(error: error));
 
     return this;
   }
 
+  /// Validates that the string contains only alphabetic characters (`a-z`, `A-Z`).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.alpha().build().validate('abc'); // isValid: true
+  /// ```
   StringNode<T> alpha({String? error}) {
     _validators.add(StringValidator.alpha(error: error));
 
     return this;
   }
 
+  /// Validates that the string can be parsed into a double.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.isDouble().build().validate('3.14'); // isValid: true
+  /// ```
   StringNode<T> isDouble({String? error}) {
     _validators.add(StringValidator.isDouble(error: error));
 
     return this;
   }
 
+  /// Validates that the string can be parsed into an integer.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.isInt().build().validate('42'); // isValid: true
+  /// ```
   StringNode<T> isInt({String? error}) {
     _validators.add(StringValidator.isInt(error: error));
 
     return this;
   }
 
+  /// Validates that the string is a valid JWT token format (3 parts separated by `.`).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.jwt().build().validate('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.abc.def'); // isValid: true
+  /// ```
   StringNode<T> jwt({String? error}) {
     _validators.add(StringValidator.jwt(error: error));
 
     return this;
   }
 
+  /// Validates that the string matches the given regex [pattern].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.pattern(r'^[a-z]+$').build().validate('abc'); // isValid: true
+  /// ```
   StringNode<T> pattern(String pattern, {String? error}) {
     _validators.add(StringValidator.pattern(pattern, error: error));
 
     return this;
   }
 
+  /// Validates that the string is exactly equal to [expectedString].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.equals('yes').build().validate('yes'); // isValid: true
+  /// ```
   StringNode<T> equals(String expectedString, {String? error}) {
     _validators.add(StringValidator.equals(expectedString, error: error));
 
@@ -885,20 +1188,37 @@ class StringNode<T extends String> extends ValidatorNode<T, StringNode<T>> {
     return this;
   }
 
-  /// Validates that the string ends with the provided [suffix].
+  /// Validates that the string ends with the specified [suffix].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.endsWith('.txt').build().validate('file.txt'); // isValid: true
+  /// ```
   StringNode<T> endsWith(String suffix, {String? error}) {
     _validators.add(StringValidator.endsWith(suffix, error: error));
 
     return this;
   }
 
-  /// Validates that the string starts with the provided [prefix].
+  /// Validates that the string starts with the specified [prefix].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.startsWith('https://').build().validate('https://site.com'); // isValid: true
+  /// ```
   StringNode<T> startsWith(String suffix, {String? error}) {
     _validators.add(StringValidator.startsWith(suffix, error: error));
 
     return this;
   }
 
+  /// Validates that the string contains **repeating characters** in a row.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// Checkit.string.hasRepeats().build().validate('aa'); // isValid: true
+  /// Checkit.string.hasRepeats().build().validate('abc'); // isValid: false
+  /// ```
   StringNode<T> hasRepeats({String? error}) {
     _validators.add(StringValidator.hasRepeats(error: error));
 
@@ -953,49 +1273,123 @@ class IpNode<T extends String> extends ValidatorNode<T, IpNode<T>> {
     return clone;
   }
 
-  /// Requires IPv4 format (e.g. 192.168.1.1).
+  /// Requires the value to be a valid IPv4 address (e.g. 192.168.1.1).
+  ///
+  /// If the string does not conform to IPv4 format, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.ip().v4().build();
+  ///
+  /// print(validator.validate('192.168.0.1').isValid); // true
+  /// print(validator.validate('::1').isValid); // false
+  /// ```
   IpNode<T> v4({String? error}) {
     _validators.add(IpValidator.v4(error: error));
 
     return this;
   }
 
-  /// Requires IPv6 format.
+  /// Requires the value to be a valid IPv6 address.
+  ///
+  /// If the string is not a valid IPv6 address, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.ip().v6().build();
+  ///
+  /// print(validator.validate('::1').isValid); // true
+  /// print(validator.validate('192.168.0.1').isValid); // false
+  /// ```
   IpNode<T> v6({String? error}) {
     _validators.add(IpValidator.v6(error: error));
 
     return this;
   }
 
-  /// Requires the IP to be in a given subnet (CIDR).
+  /// Requires the IP to be within a specific CIDR subnet (e.g. 192.168.1.0/24).
+  ///
+  /// If the IP address is outside the given subnet, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.ip().inSubnet('10.0.0.0/8').build();
+  ///
+  /// print(validator.validate('10.1.2.3').isValid); // true
+  /// print(validator.validate('192.168.0.1').isValid); // false
+  /// ```
   IpNode<T> inSubnet(String cidr, {String? error}) {
     _validators.add(IpValidator.inSubnet(cidr, error: error));
 
     return this;
   }
 
-  /// Requires the IP to be link-local.
+  /// Requires the IP to be link-local (e.g. 169.254.x.x or fe80::/10).
+  ///
+  /// Link-local addresses are typically used for local network communication.
+  /// If the IP is not within the link-local range, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.ip().linkLocal().build();
+  ///
+  /// print(validator.validate('169.254.10.1').isValid); // true
+  /// print(validator.validate('192.168.1.1').isValid); // false
+  /// ```
   IpNode<T> linkLocal({String? error}) {
     _validators.add(IpValidator.linkLocal(error: error));
 
     return this;
   }
 
-  /// Requires the IP to be localhost (127.0.0.1 or ::1).
+  /// Requires the IP to represent localhost (127.0.0.1 for IPv4 or ::1 for IPv6).
+  ///
+  /// If the IP is not a recognized localhost address, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.ip().localhost().build();
+  ///
+  /// print(validator.validate('127.0.0.1').isValid); // true
+  /// print(validator.validate('::1').isValid);       // true
+  /// print(validator.validate('192.168.0.1').isValid); // false
+  /// ```
   IpNode<T> localhost({String? error}) {
     _validators.add(IpValidator.localhost(error: error));
 
     return this;
   }
 
-  /// Requires the IP to be a loopback address.
+  /// Requires the IP to be within the loopback range (127.0.0.0/8 or ::1).
+  ///
+  /// Loopback IPs are typically used for internal testing or self-reference.
+  /// If the IP is outside the loopback range, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.ip().loopback().build();
+  ///
+  /// print(validator.validate('127.5.0.1').isValid); // true
+  /// print(validator.validate('::1').isValid);       // true
+  /// print(validator.validate('192.168.0.1').isValid); // false
+  /// ```
   IpNode<T> loopback({String? error}) {
     _validators.add(IpValidator.loopback(error: error));
 
     return this;
   }
 
-  /// Requires the IP to be in a specific range.
+  /// Requires the IP to be within a specified range from [startIp] to [endIp] (inclusive).
+  ///
+  /// If the IP is outside the specified range, validation fails.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.ip().range('192.168.0.1', '192.168.0.255').build();
+  ///
+  /// print(validator.validate('192.168.0.100').isValid); // true
+  /// print(validator.validate('10.0.0.1').isValid);       // false
+  /// ```
   IpNode<T> range(String startIp, String endIp, {String? error}) {
     _validators.add(IpValidator.range(startIp, endIp, error: error));
 
@@ -1008,11 +1402,19 @@ class IpNode<T extends String> extends ValidatorNode<T, IpNode<T>> {
   }
 }
 
-/// Validates that a string represents a subnet that contains a given IP.
+/// A validator node for checking string values representing IP subnets.
+///
+/// This node allows validating whether a given subnet (in CIDR format) contains
+/// a specific IP address.
 ///
 /// ### Example:
 /// ```dart
-/// Checkit.string.subnet('192.168.0.0/24').contains('192.168.0.10');
+/// final validator = Checkit.string.subnet('192.168.1.0/24').contains('192.168.1.42').build();
+/// final result = validator.validate('192.168.1.0/24');
+/// print(result.isValid); // true
+///
+/// final invalid = validator.validate('10.0.0.0/24');
+/// print(invalid.isValid); // false
 /// ```
 class SubnetNode<T extends String> extends ValidatorNode<T, SubnetNode<T>> {
   SubnetNode(super._locale);
@@ -1024,7 +1426,17 @@ class SubnetNode<T extends String> extends ValidatorNode<T, SubnetNode<T>> {
     return clone;
   }
 
-  /// Requires the subnet to contain the given [ip].
+  /// Validates that the subnet contains the specified [ip] address.
+  ///
+  /// The input value must be a subnet in CIDR format (e.g., `'192.168.0.0/24'`),
+  /// and the [ip] must fall within the subnet's address range.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.string.subnet('192.168.0.0/24').contains('192.168.0.42');
+  /// print(validator.validateOnce('192.168.0.0/24').isValid); // true
+  /// print(validator.validateOnce('10.0.0.0/24').isValid); // false
+  /// ```
   SubnetNode<T> contains(String ip, {String? error}) {
     _validators.add(SubnetValidator.contains(ip, error: error));
 
@@ -1037,6 +1449,22 @@ class SubnetNode<T extends String> extends ValidatorNode<T, SubnetNode<T>> {
   }
 }
 
+/// A validator node for `DateTime` values.
+///
+/// This node allows you to validate `DateTime` objects against various
+/// constraints such as range, minimum/maximum year, whether the date is in
+/// the past or future, and more.
+///
+/// ### Example:
+/// ```dart
+/// final validator = Checkit.dateTime()
+///   .notFuture()
+///   .minYear(2000)
+///   .build();
+///
+/// final result = validator.validate(DateTime(1999));
+/// print(result.isValid); // false
+/// ```
 class DateTimeNode<T extends DateTime>
     extends ValidatorNode<T, DateTimeNode<T>> {
   DateTimeNode(super._context);
@@ -1048,56 +1476,119 @@ class DateTimeNode<T extends DateTime>
     return clone;
   }
 
-  /// Maximum allowed year.
+  /// Requires the year of the `DateTime` to be less than or equal to [max].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.dateTime().maxYear(2025).build();
+  /// print(validator.validate(DateTime(2026)).isValid); // false
+  /// ```
   DateTimeNode maxYear(int max, {String? error}) {
     _validators.add(DateTimeValidator.maxYear(max, error: error));
 
     return this;
   }
 
-  /// Minimum allowed year.
+  /// Requires the year of the `DateTime` to be greater than or equal to [min].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.dateTime().minYear(2000).build();
+  /// print(validator.validate(DateTime(1999)).isValid); // false
+  /// ```
   DateTimeNode minYear(int min, {String? error}) {
     _validators.add(DateTimeValidator.minYear(min, error: error));
 
     return this;
   }
 
-  /// Date must not be in the past.
+  /// Fails if the date is in the past (i.e., before `DateTime.now()`).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.dateTime().notPast().build();
+  /// print(validator.validate(DateTime.now().subtract(Duration(days: 1))).isValid); // false
+  /// ```
   DateTimeNode notPast({String? error}) {
     _validators.add(DateTimeValidator.notPast(error: error));
 
     return this;
   }
 
-  /// Date must not be in the future.
+  /// Fails if the date is in the future (i.e., after `DateTime.now()`).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.dateTime().notFuture().build();
+  /// print(validator.validate(DateTime.now().add(Duration(days: 1))).isValid); // false
+  /// ```
   DateTimeNode notFuture({String? error}) {
     _validators.add(DateTimeValidator.notFuture(error: error));
 
     return this;
   }
 
-  /// Date must be before a certain string date.
+  /// Fails if the date is not before the given [date].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.dateTime().before(DateTime(2025)).build();
+  /// print(validator.validate(DateTime(2030)).isValid); // false
+  /// ```
   DateTimeNode before(DateTime date, {String? error}) {
     _validators.add(DateTimeValidator.before(date, error: error));
 
     return this;
   }
 
-  /// Date must be after a certain string date.
+  /// Fails if the date is not after the given [date].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.dateTime().after(DateTime(2020)).build();
+  /// print(validator.validate(DateTime(2010)).isValid); // false
+  /// ```
   DateTimeNode after(DateTime date, {String? error}) {
     _validators.add(DateTimeValidator.after(date, error: error));
 
     return this;
   }
 
-  /// Date must be within the given range.
-  DateTimeNode range(DateTime start, DateTime end, {String? error}) {
-    _validators.add(DateTimeValidator.range(start, end, error: error));
+  /// Validates that the date is within the given range.
+  ///
+  /// By default, the range is inclusive (i.e., boundaries are allowed).
+  /// Set [inclusive] to `false` if the range should be strict.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.dateTime()
+  ///   .range(DateTime(2020), DateTime(2025))
+  ///   .build();
+  ///
+  /// print(validator.validate(DateTime(2023)).isValid); // true
+  /// print(validator.validate(DateTime(2026)).isValid); // false
+  /// ```
+  DateTimeNode range(
+    DateTime start,
+    DateTime end, {
+    String? error,
+    bool inclusive = true,
+  }) {
+    _validators.add(
+      DateTimeValidator.range(start, end, error: error, inclusive: inclusive),
+    );
 
     return this;
   }
 
-  /// Requires the date to be a leap year.
+  /// Requires the date to be in a leap year.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.dateTime().leapYear().build();
+  /// print(validator.validate(DateTime(2024, 2, 29)).isValid); // true
+  /// print(validator.validate(DateTime(2023, 2, 28)).isValid); // false
+  /// ```
   DateTimeNode leapYear({String? error}) {
     _validators.add(DateTimeValidator.leapYear(error: error));
 
@@ -1110,6 +1601,21 @@ class DateTimeNode<T extends DateTime>
   }
 }
 
+/// A validator node for integers.
+///
+/// Provides a set of rules specifically for validating `int` values.
+///
+/// ### Example:
+/// ```dart
+/// final validator = Checkit.int()
+///   .min(10)
+///   .max(100)
+///   .even()
+///   .build();
+///
+/// final result = validator.validate(42);
+/// print(result.isValid); // true
+/// ```
 class IntNode<T extends int> extends ValidatorNode<T, IntNode<T>> {
   IntNode(super._context);
 
@@ -1120,77 +1626,183 @@ class IntNode<T extends int> extends ValidatorNode<T, IntNode<T>> {
     return clone;
   }
 
-  /// Minimum allowed value.
+  /// Requires the number to be greater than or equal to [min].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().min(5).build();
+  /// print(validator.validate(4).isValid); // false
+  /// ```
   IntNode<T> min(int min, {String? error}) {
     _validators.add(NumValidator.min(min, error: error));
 
     return this;
   }
 
-  /// Maximum allowed value.
+  /// Requires the number to be less than or equal to [max].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().max(10).build();
+  /// print(validator.validate(11).isValid); // false
+  /// ```
   IntNode<T> max(int max, {String? error}) {
     _validators.add(NumValidator.max(max, error: error));
 
     return this;
   }
 
-  /// Requires a positive number (> 0).
+  /// Requires the number to be strictly positive (> 0).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.integer().positive().build();
+  /// print(validator.validate(0).isValid); // false
+  /// ```
   IntNode<T> positive({String? error}) {
     _validators.add(NumValidator.positive(error: error));
 
     return this;
   }
 
-  /// Requires a negative number (< 0).
+  /// Requires the number to be strictly negative (< 0).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().negative().build();
+  /// print(validator.validate(1).isValid); // false
+  /// ```
   IntNode<T> negative({String? error}) {
     _validators.add(NumValidator.negative(error: error));
 
     return this;
   }
 
-  /// Requires number to be in a specific range (inclusive).
-  IntNode<T> range(int min, int max, {String? error}) {
-    _validators.add(NumValidator.range(min, max, error: error));
+  /// Requires the number to be within the range `[min, max]` (default: inclusive).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().range(5, 10).build();
+  /// print(validator.validate(7).isValid); // true
+  /// print(validator.validate(11).isValid); // false
+  /// ```
+  IntNode<T> range(
+    int min,
+    int max, {
+    String? error,
+    bool includeMin = true,
+    bool includeMax = true,
+  }) {
+    _validators.add(
+      NumValidator.range(
+        min,
+        max,
+        error: error,
+        includeMax: includeMax,
+        includeMin: includeMin,
+      ),
+    );
 
     return this;
   }
 
+  /// Requires the number to have exactly [count] digits.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().digitCount(3).build();
+  /// print(validator.validate(123).isValid); // true
+  /// print(validator.validate(12).isValid); // false
+  /// ```
   IntNode<T> digitCount(int count, {String? error}) {
     _validators.add(IntValidator.digitCount(count, error: error));
 
     return this;
   }
 
+  /// Requires the number to be divisible by [divisor] with no remainder.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().divisibleBy(3).build();
+  /// print(validator.validate(9).isValid); // true
+  /// print(validator.validate(10).isValid); // false
+  /// ```
   IntNode<T> divisibleBy(int divisor, {String? error}) {
     _validators.add(IntValidator.divisibleBy(divisor, error: error));
 
     return this;
   }
 
+  /// Requires the number to be even.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().even().build();
+  /// print(validator.validate(4).isValid); // true
+  /// print(validator.validate(3).isValid); // false
+  /// ```
   IntNode<T> even({String? error}) {
     _validators.add(IntValidator.even(error: error));
 
     return this;
   }
 
+  /// Requires the number to be odd.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().odd().build();
+  /// print(validator.validate(5).isValid); // true
+  /// print(validator.validate(6).isValid); // false
+  /// ```
   IntNode<T> odd({String? error}) {
     _validators.add(IntValidator.odd(error: error));
 
     return this;
   }
 
+  /// Requires the number to match one of the values from [allowedValues].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().oneOf({1, 2, 3}).build();
+  /// print(validator.validate(2).isValid); // true
+  /// print(validator.validate(4).isValid); // false
+  /// ```
   IntNode<T> oneOf(Set<int> allowedValues, {String? error}) {
     _validators.add(IntValidator.oneOf(allowedValues, error: error));
 
     return this;
   }
 
+  /// Requires the number to be a prime number.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int().prime().build();
+  /// print(validator.validate(7).isValid); // true
+  /// print(validator.validate(8).isValid); // false
+  /// ```
   IntNode<T> prime({String? error}) {
     _validators.add(IntValidator.prime(error: error));
 
     return this;
   }
 
+  /// Requires the number to be in the range `[min, max]` and match the [step].
+  ///
+  /// You can control inclusivity using [includeMin] and [includeMax].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.int()
+  ///   .rangeWithStep(10, 20, 5)
+  ///   .build();
+  ///
+  /// print(validator.validate(15).isValid); // true
+  /// print(validator.validate(17).isValid); // false
+  /// ```
   IntNode<T> rangeWithStep(
     int min,
     int max,
@@ -1219,6 +1831,20 @@ class IntNode<T extends int> extends ValidatorNode<T, IntNode<T>> {
   }
 }
 
+/// A validator node for `double` values.
+///
+/// Provides a set of rules to validate floating-point numbers.
+///
+/// ### Example:
+/// ```dart
+/// final validator = Checkit.double()
+///   .positive()
+///   .finite()
+///   .build();
+///
+/// print(validator.validate(12.5).isValid); // true
+/// print(validator.validate(double.infinity).isValid); // false
+/// ```
 class DoubleNode<T extends double> extends ValidatorNode<T, DoubleNode<T>> {
   DoubleNode(super._context);
 
@@ -1229,53 +1855,121 @@ class DoubleNode<T extends double> extends ValidatorNode<T, DoubleNode<T>> {
     return clone;
   }
 
-  /// Minimum allowed value.
+  /// Requires the number to be greater than or equal to [min].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.double().min(1).build();
+  /// print(validator.validate(0.5).isValid); // false
+  /// ```
   DoubleNode<T> min(int min, {String? error}) {
     _validators.add(NumValidator.min(min, error: error));
 
     return this;
   }
 
-  /// Maximum allowed value.
+  /// Requires the number to be less than or equal to [max].
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.double().max(100).build();
+  /// print(validator.validate(101.0).isValid); // false
+  /// ```
   DoubleNode<T> max(int max, {String? error}) {
     _validators.add(NumValidator.max(max, error: error));
 
     return this;
   }
 
-  /// Requires a positive number (> 0).
+  /// Requires the number to be strictly greater than 0.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.double().positive().build();
+  /// print(validator.validate(-1.0).isValid); // false
+  /// ```
   DoubleNode<T> positive({String? error}) {
     _validators.add(NumValidator.positive(error: error));
 
     return this;
   }
 
-  /// Requires a negative number (< 0).
+  /// Requires the number to be strictly less than 0.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.double().negative().build();
+  /// print(validator.validate(0.1).isValid); // false
+  /// ```
   DoubleNode<T> negative({String? error}) {
     _validators.add(NumValidator.negative(error: error));
 
     return this;
   }
 
-  /// Requires number to be in a specific range (inclusive).
-  DoubleNode<T> range(int min, int max, {String? error}) {
-    _validators.add(NumValidator.range(min, max, error: error));
+  /// Requires the number to be within the range `[min, max]`.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.double().range(0, 10).build();
+  /// print(validator.validate(5.0).isValid); // true
+  /// print(validator.validate(15.0).isValid); // false
+  /// ```
+  DoubleNode<T> range(
+    int min,
+    int max, {
+    String? error,
+    bool includeMin = true,
+    bool includeMax = true,
+  }) {
+    _validators.add(
+      NumValidator.range(
+        min,
+        max,
+        error: error,
+        includeMax: includeMax,
+        includeMin: includeMin,
+      ),
+    );
 
     return this;
   }
 
+  /// Requires the number to have a fractional part (i.e., not an integer).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.double().decimal().build();
+  /// print(validator.validate(5.5).isValid); // true
+  /// print(validator.validate(6.0).isValid); // false
+  /// ```
   DoubleNode<T> decimal({String? error}) {
     _validators.add(DoubleValidator.decimal(error: error));
 
     return this;
   }
 
+  /// Requires the number to be finite (not `NaN`, `Infinity`, or `-Infinity`).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.double().finite().build();
+  /// print(validator.validate(double.infinity).isValid); // false
+  /// ```
   DoubleNode<T> finite({String? error}) {
     _validators.add(DoubleValidator.finite(error: error));
 
     return this;
   }
 
+  /// Requires the number to be an integer (i.e., no fractional part).
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final validator = Checkit.double().integer().build();
+  /// print(validator.validate(5.0).isValid); // true
+  /// print(validator.validate(5.1).isValid); // false
+  /// ```
   DoubleNode<T> integer({String? error}) {
     _validators.add(DoubleValidator.integer(error: error));
 

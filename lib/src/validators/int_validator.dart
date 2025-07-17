@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'validator.dart';
 
 abstract class IntValidator {
@@ -23,7 +25,13 @@ abstract class IntValidator {
     if (value < 2) {
       return (false, error ?? context.errors.intErrors.prime());
     }
-    for (int i = 2; i <= value ~/ 2; i++) {
+    if (value == 2) {
+      return (true, null);
+    }
+    if (value % 2 == 0) {
+      return (false, error ?? context.errors.intErrors.prime());
+    }
+    for (int i = 3; i <= sqrt(value.toDouble()).floor(); i += 2) {
       if (value % i == 0) {
         return (false, error ?? context.errors.intErrors.prime());
       }

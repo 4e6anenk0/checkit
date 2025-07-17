@@ -89,7 +89,6 @@ class DateParser {
     }
 
     buffer.write(r'$');
-    //_regex = RegExp(buffer.toString(), caseSensitive: false);
     return buffer.toString();
   }
 
@@ -210,7 +209,6 @@ class DateParser {
       final shortYear = int.parse(values['yy']!);
       year = normalizeShortYear(shortYear);
     } else {
-      //throw FormatException('Year is not provided');
       year = DateTime.now().year;
     }
 
@@ -219,7 +217,7 @@ class DateParser {
     final minute = int.parse(values['mm'] ?? '0');
     final second = int.parse(values['ss'] ?? '0');
     final millisecond = int.parse(values['sss'] ?? '0');
-    //var hour = int.parse(values['HH'] ?? '0');
+
     int hour;
 
     if (values.containsKey('HH')) {
@@ -477,7 +475,7 @@ class DateParser {
     final hasMilliseconds = RegExp(r'\.\d{1,3}').hasMatch(cleaned);
     final hasTimeZone = RegExp(r'(Z|[+-]\d{2}:?\d{2}?)$').hasMatch(cleaned);
 
-    // Удаляем AM/PM, миллисекунды и временную зону для анализа основной структуры
+    // Remove AM/PM, milliseconds and time zone to analyze the underlying structure
     var cleanedTime =
         cleaned
             .replaceAll(RegExp(r'\s?(am|pm)', caseSensitive: false), '')
@@ -539,7 +537,7 @@ class DateTimeParts {
       millisecond,
     );
     if (timezoneOffset == null) {
-      return dt.toLocal(); // або dt
+      return dt.toLocal(); // or dt
     } else {
       return dt.subtract(timezoneOffset!);
     }

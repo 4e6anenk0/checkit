@@ -61,27 +61,6 @@ class IpSubnet {
     return IpSubnet._(masked, prefixLength);
   }
 
-  /* static IpAddress _applyMask(IpAddress ip, int prefixLength) {
-    final totalBytes = ip.bytes.length;
-    final maskedBytes = List<int>.from(ip.bytes);
-
-    final fullBytes = prefixLength ~/ 8;
-    final remainingBits = prefixLength % 8;
-
-    // Обрезаем байты за пределами префикса
-    for (int i = fullBytes + (remainingBits > 0 ? 1 : 0); i < totalBytes; i++) {
-      maskedBytes[i] = 0;
-    }
-
-    // Маскируем последний байт частично, если нужно
-    if (remainingBits > 0) {
-      final mask = 0xFF << (8 - remainingBits) & 0xFF;
-      maskedBytes[fullBytes] &= mask;
-    }
-
-    return IpAddress.fromBytes(ip.type, maskedBytes);
-  } */
-
   static IpAddress _applyMask(IpAddress ip, int prefixLength) {
     final totalBits = ip.bytes.length * 8;
     final maskedBytes = List<int>.from(ip.bytes);
@@ -90,7 +69,6 @@ class IpSubnet {
         final byteIndex = i ~/ 8;
         final bitIndex = 7 - (i % 8);
         maskedBytes[byteIndex] &= ~(1 << bitIndex);
-        print(maskedBytes.toString());
       }
     }
     return IpAddress.fromBytes(ip.type, maskedBytes);

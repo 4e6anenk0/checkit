@@ -9,11 +9,16 @@ abstract class StringValidator {
     return (false, error ?? context.errors.stringErrors.email());
   };
 
-  static Validator<String> range(int min, int max, {String? error}) => (
-    value,
-    context,
-  ) {
-    if (value.length >= min && value.length <= max) return (true, null);
+  static Validator<String> range(
+    int min,
+    int max, {
+    String? error,
+    bool includeMin = true,
+    bool includeMax = true,
+  }) => (value, context) {
+    final minOk = includeMin ? value.length >= min : value.length > min;
+    final maxOk = includeMax ? value.length <= max : value.length < max;
+    if (minOk && maxOk) return (true, null);
     return (false, error ?? context.errors.stringErrors.range(min, max));
   };
 
