@@ -18,6 +18,7 @@ library;
 
 export 'src/validation_resources.dart';
 export 'src/validation_context.dart';
+export 'src/validation_result.dart';
 export 'src/errors/errors.dart';
 export 'src/errors/warnings.dart';
 export 'src/advanced_validators/group_validators.dart';
