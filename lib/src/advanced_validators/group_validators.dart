@@ -48,7 +48,6 @@ class AndValidator<T> extends CompositeValidator<T> {
     final errors = List.generate(
       collectedErrors.length,
       (i) => collectedErrors![i],
-
       growable: false,
     );
 

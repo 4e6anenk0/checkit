@@ -137,7 +137,7 @@ class DateTimeResource extends DateResource {
   DateTime get date => _date;
 
   DateTimeResource.fromString(String date, String format)
-    : _date = _parseString(date, format);
+      : _date = _parseString(date, format);
 
   static DateTime _parseString(String date, String format) {
     final DateParser parser = DateParser();

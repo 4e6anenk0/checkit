@@ -64,8 +64,8 @@ class DateParser {
   }
 
   String _createRegexString(String pattern) {
-    final keys =
-        _tokenRegex.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
+    final keys = _tokenRegex.keys.toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
     final tokenPattern = RegExp(keys.join('|'));
     final buffer = StringBuffer('^');
     _tokenOrder = [];
@@ -476,12 +476,11 @@ class DateParser {
     final hasTimeZone = RegExp(r'(Z|[+-]\d{2}:?\d{2}?)$').hasMatch(cleaned);
 
     // Remove AM/PM, milliseconds and time zone to analyze the underlying structure
-    var cleanedTime =
-        cleaned
-            .replaceAll(RegExp(r'\s?(am|pm)', caseSensitive: false), '')
-            .replaceAll(RegExp(r'\.\d{1,3}'), '')
-            .replaceAll(RegExp(r'(Z|[+-]\d{2}:?\d{2}?)$'), '')
-            .trim();
+    var cleanedTime = cleaned
+        .replaceAll(RegExp(r'\s?(am|pm)', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\.\d{1,3}'), '')
+        .replaceAll(RegExp(r'(Z|[+-]\d{2}:?\d{2}?)$'), '')
+        .trim();
 
     final parts = cleanedTime.split(':');
 

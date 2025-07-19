@@ -14,14 +14,14 @@ abstract class NumValidator {
       };
 
   static Validator<num> positive({String? error}) => (value, context) {
-    if (value >= 0) return (true, null);
-    return (false, error ?? context.errors.numErrors.positive());
-  };
+        if (value >= 0) return (true, null);
+        return (false, error ?? context.errors.numErrors.positive());
+      };
 
   static Validator<num> negative({String? error}) => (value, context) {
-    if (value <= 0) return (true, null);
-    return (false, error ?? context.errors.numErrors.negative());
-  };
+        if (value <= 0) return (true, null);
+        return (false, error ?? context.errors.numErrors.negative());
+      };
 
   static Validator<num> range(
     num min,
@@ -29,18 +29,19 @@ abstract class NumValidator {
     String? error,
     bool includeMin = true,
     bool includeMax = true,
-  }) => (value, context) {
-    final minOk = includeMin ? value >= min : value > min;
-    final maxOk = includeMax ? value <= max : value < max;
-    if (minOk && maxOk) return (true, null);
-    return (false, error ?? context.errors.numErrors.range(min, max));
-  };
+  }) =>
+      (value, context) {
+        final minOk = includeMin ? value >= min : value > min;
+        final maxOk = includeMax ? value <= max : value < max;
+        if (minOk && maxOk) return (true, null);
+        return (false, error ?? context.errors.numErrors.range(min, max));
+      };
 
   static Validator<num> multiple(num factor, {String? error}) => (
-    value,
-    context,
-  ) {
-    if (value % factor == 0) return (true, null);
-    return (false, error ?? context.errors.numErrors.multiple(factor));
-  };
+        value,
+        context,
+      ) {
+        if (value % factor == 0) return (true, null);
+        return (false, error ?? context.errors.numErrors.multiple(factor));
+      };
 }

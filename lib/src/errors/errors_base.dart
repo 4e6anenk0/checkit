@@ -41,15 +41,15 @@ class CheckitErrors implements ICheckitErrors {
   });
 
   factory CheckitErrors.defaultErrors() => const CheckitErrors(
-    stringErrors: StringCheckitErrors(),
-    numErrors: NumCheckitErrors(),
-    ipErrors: IpCheckitErrors(),
-    passwordErrors: PasswordCheckitErrors(),
-    stringDateErrors: StringDateCheckitErrors(),
-    generalErrors: GeneralCheckitErrors(),
-    intErrors: IntCheckitErrors(),
-    doubleErrors: DoubleCheckitErrors(),
-  );
+        stringErrors: StringCheckitErrors(),
+        numErrors: NumCheckitErrors(),
+        ipErrors: IpCheckitErrors(),
+        passwordErrors: PasswordCheckitErrors(),
+        stringDateErrors: StringDateCheckitErrors(),
+        generalErrors: GeneralCheckitErrors(),
+        intErrors: IntCheckitErrors(),
+        doubleErrors: DoubleCheckitErrors(),
+      );
 
   CheckitErrors copyWith({
     StringCheckitErrorsBase? stringErrors,

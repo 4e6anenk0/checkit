@@ -13,16 +13,15 @@ final testInputs = List<String>.generate(10000, (i) {
 class CheckitBenchmark extends BenchmarkBase {
   CheckitBenchmark() : super('Checkit');
 
-  final validator =
-      Checkit.string
-          .password()
-          .hasDigit()
-          .hasLowercase()
-          .hasUppercase()
-          .hasSpecial()
-          .noSpace()
-          .min(8)
-          .build();
+  final validator = Checkit.string
+      .password()
+      .hasDigit()
+      .hasLowercase()
+      .hasUppercase()
+      .hasSpecial()
+      .noSpace()
+      .min(8)
+      .build();
 
   @override
   void run() {
@@ -47,21 +46,20 @@ class CheckitGeneralBenchmark extends BenchmarkBase {
 
 class CheckitBenchmarkWithOptimization extends BenchmarkBase {
   CheckitBenchmarkWithOptimization()
-    : super('Checkit with optimization (stop on first error)');
+      : super('Checkit with optimization (stop on first error)');
 
-  final validator =
-      Checkit.string
-          .withContext(
-            Checkit.config.copyWith(stopOnFirstError: true).buildContext(),
-          )
-          .password()
-          .hasDigit()
-          .hasLowercase()
-          .hasUppercase()
-          .hasSpecial()
-          .noSpace()
-          .min(8)
-          .build();
+  final validator = Checkit.string
+      .withContext(
+        Checkit.config.copyWith(stopOnFirstError: true).buildContext(),
+      )
+      .password()
+      .hasDigit()
+      .hasLowercase()
+      .hasUppercase()
+      .hasSpecial()
+      .noSpace()
+      .min(8)
+      .build();
 
   @override
   void run() {

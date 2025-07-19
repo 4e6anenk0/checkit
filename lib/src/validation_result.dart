@@ -18,10 +18,9 @@ class ValidationResult {
         : ValidationResult.failure(errors);
   }
 
-  factory ValidationResult.single(String? message) =>
-      message == null
-          ? ValidationResult.success()
-          : ValidationResult.failure([message]);
+  factory ValidationResult.single(String? message) => message == null
+      ? ValidationResult.success()
+      : ValidationResult.failure([message]);
 
   ValidationResult operator &(ValidationResult other) =>
       isValid && other.isValid
@@ -33,10 +32,9 @@ class ValidationResult {
           ? ValidationResult.success()
           : ValidationResult.failure([...errors, ...other.errors]);
 
-  ValidationResult operator ~() =>
-      isValid
-          ? ValidationResult.failure(['Negation failed'])
-          : ValidationResult.success();
+  ValidationResult operator ~() => isValid
+      ? ValidationResult.failure(['Negation failed'])
+      : ValidationResult.success();
 
   String? toMessageString([String separator = '\n']) =>
       isValid ? null : errors.join(separator);

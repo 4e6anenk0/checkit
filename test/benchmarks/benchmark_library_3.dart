@@ -25,15 +25,14 @@ class CheckitBenchmark extends BenchmarkBase {
 
 class CheckitBenchmarkWithOptimization extends BenchmarkBase {
   CheckitBenchmarkWithOptimization()
-    : super('Checkit with optimization (PermanentCache)');
+      : super('Checkit with optimization (PermanentCache)');
 
-  final validator =
-      Checkit.string
-          .ip()
-          .withContext(
-            Checkit.config.copyWith(usePermanentCache: true).buildContext(),
-          )
-          .build();
+  final validator = Checkit.string
+      .ip()
+      .withContext(
+        Checkit.config.copyWith(usePermanentCache: true).buildContext(),
+      )
+      .build();
 
   @override
   void run() {

@@ -60,22 +60,22 @@ class ValidationContext {
   });
 
   factory ValidationContext.defaultContext() => ValidationContext(
-    errors: const CheckitErrors(
-      stringErrors: StringCheckitErrors(),
-      generalErrors: GeneralCheckitErrors(),
-      numErrors: NumCheckitErrors(),
-      stringDateErrors: StringDateCheckitErrors(),
-      passwordErrors: PasswordCheckitErrors(),
-      ipErrors: IpCheckitErrors(),
-      intErrors: IntCheckitErrors(),
-      doubleErrors: DoubleCheckitErrors(),
-    ),
-    warnings: Warnings(),
-    resources: ValidationResources(),
-    caseHandling: CaseHandling.exact,
-    usePermanentCache: false,
-    stopOnFirstError: false,
-  );
+        errors: const CheckitErrors(
+          stringErrors: StringCheckitErrors(),
+          generalErrors: GeneralCheckitErrors(),
+          numErrors: NumCheckitErrors(),
+          stringDateErrors: StringDateCheckitErrors(),
+          passwordErrors: PasswordCheckitErrors(),
+          ipErrors: IpCheckitErrors(),
+          intErrors: IntCheckitErrors(),
+          doubleErrors: DoubleCheckitErrors(),
+        ),
+        warnings: Warnings(),
+        resources: ValidationResources(),
+        caseHandling: CaseHandling.exact,
+        usePermanentCache: false,
+        stopOnFirstError: false,
+      );
 
   ValidationContext copyWith({
     ICheckitErrors? errors,
