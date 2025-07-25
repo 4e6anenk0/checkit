@@ -62,96 +62,53 @@ abstract class ValidationResourcesBase {
 }
 
 class ValidationResources extends ValidationResourcesBase {
-  RegExp? _emailPattern;
-  RegExp? _alphaPattern;
-  RegExp? _alphanumericPattern;
-  RegExp? _uppercaseLetterPattern;
-  RegExp? _lowercaseLetterPattern;
-  RegExp? _letterPattern;
-  RegExp? _digitPattern;
-  RegExp? _spacePattern;
-  RegExp? _specialCharsPattern;
-  RegExp? _jwtPattern;
-  RegExp? _typicalPasswordPattern;
-  RegExp? _strongPasswordPattern;
-  RegExp? _simplePasswordPattern;
-  RegExp? _repeatPattern;
+  @override
+  late final RegExp emailPattern = RegExp(
+    r"^(?!.*\.\.)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+  );
 
   @override
-  RegExp get emailPattern {
-    return _emailPattern ??= RegExp(
-      r"^(?!.*\.\.)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
-    );
-  }
+  late final RegExp alphaPattern = RegExp(r"^[a-zA-Z]+$");
 
   @override
-  RegExp get alphaPattern {
-    return _alphaPattern ??= RegExp(r"^[a-zA-Z]+$");
-  }
+  late final RegExp alphanumericPattern = RegExp(r"^[a-zA-Z0-9]+$");
 
   @override
-  RegExp get alphanumericPattern {
-    return _alphanumericPattern ??= RegExp(r"^[a-zA-Z0-9]+$");
-  }
+  late final RegExp uppercaseLetterPattern = RegExp(r"[A-Z]");
 
   @override
-  RegExp get uppercaseLetterPattern {
-    return _uppercaseLetterPattern ??= RegExp(r"[A-Z]");
-  }
+  late final RegExp lowercaseLetterPattern = RegExp(r"[a-z]");
 
   @override
-  RegExp get lowercaseLetterPattern {
-    return _lowercaseLetterPattern ??= RegExp(r"[a-z]");
-  }
+  late final RegExp letterPattern = RegExp(r"[A-Za-z]");
 
   @override
-  RegExp get letterPattern {
-    return _letterPattern ??= RegExp(r"[A-Za-z]");
-  }
+  late final RegExp digitPattern = RegExp(r"\d");
 
   @override
-  RegExp get digitPattern {
-    return _digitPattern ??= RegExp(r"\d");
-  }
+  late final RegExp spacePattern = RegExp(r"\s");
 
   @override
-  RegExp get spacePattern {
-    return _spacePattern ??= RegExp(r"\s");
-  }
+  late final RegExp specialCharsPattern = RegExp(r"[\W]");
 
   @override
-  RegExp get specialCharsPattern {
-    return _specialCharsPattern ??= RegExp(r"[\W]");
-  }
+  late final RegExp jwtPattern = RegExp(
+    r'^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$',
+  );
 
   @override
-  RegExp get jwtPattern {
-    return _jwtPattern ??= RegExp(
-      r'^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$',
-    );
-  }
+  late final RegExp strongPasswordPattern = RegExp(
+    r'^(?!.*(.)\1)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$',
+  );
 
   @override
-  RegExp get strongPasswordPattern {
-    return _strongPasswordPattern ??= RegExp(
-      r'^(?!.*(.)\1)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$',
-    );
-  }
+  late final RegExp typicalPasswordPattern = RegExp(
+    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$',
+  );
 
   @override
-  RegExp get typicalPasswordPattern {
-    return _typicalPasswordPattern ??= RegExp(
-      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$',
-    );
-  }
+  late final RegExp simplePasswordPattern = RegExp(r'^[a-zA-Z0-9]{4,}$');
 
   @override
-  RegExp get simplePasswordPattern {
-    return _simplePasswordPattern ??= RegExp(r'^[a-zA-Z0-9]{4,}$');
-  }
-
-  @override
-  RegExp get repeatPattern {
-    return _repeatPattern ??= RegExp(r'(.)\1');
-  }
+  late final RegExp repeatPattern = RegExp(r'(.)\1');
 }
